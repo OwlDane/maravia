@@ -199,7 +199,10 @@ Route::prefix('comments')->name('comments.')->middleware(['auth'])->group(functi
 // Admin Routes
 Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    // Keep '/dashboard' working but avoid duplicate route name by redirecting to the named route
+    Route::get('/dashboard', function () {
+        return redirect()->route('admin.dashboard');
+    });
     Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
     
     // Photos
