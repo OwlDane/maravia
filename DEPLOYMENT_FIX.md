@@ -42,6 +42,13 @@
    - Option A: Redeploy (migrations will auto-fix)
    - Option B: If still failing, reset the database and redeploy
 
+### 4. Mixed Content Errors (RESOLVED ✓)
+- **Problem**: Site served over HTTPS but assets loaded over HTTP
+- **Solution**:
+  - Updated `.env.example` with production settings and HTTPS URL
+  - Added `URL::forceScheme('https')` in `AppServiceProvider`
+  - Configured `trustProxies` middleware for Railway
+
 ## Files Changed
 
 - ✅ `server.php` (created)
@@ -50,3 +57,6 @@
 - ✅ `database/migrations/2024_08_27_142054_drop_comment_reactions_if_exists.php` (created)
 - ✅ `database/migrations/2024_08_27_142055_create_comment_reactions_table.php` (renamed)
 - ✅ `database/migrations/2024_08_27_132609_create_photo_votes_table.php` (renamed)
+- ✅ `.env.example` (updated with HTTPS settings)
+- ✅ `app/Providers/AppServiceProvider.php` (added HTTPS forcing)
+- ✅ `bootstrap/app.php` (added proxy trust configuration)
