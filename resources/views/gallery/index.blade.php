@@ -1149,7 +1149,7 @@
                 }
             }
         }).catch(()=>{});
-    
+    }
 
     function openPhotoModal(item) {
         try { console.log('[PhotoModal] open', item && item.id); } catch(e) {}
