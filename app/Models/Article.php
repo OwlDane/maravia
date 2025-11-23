@@ -39,5 +39,10 @@ class Article extends Model
         return $this->cover_image ? asset('storage/'.$this->cover_image) : null;
     }
 
-    public function scopePublished($q){ return $q->where('is_published', true); }
+    public function scopePublished($q)
+    {
+        return $q->where('is_published', true)
+                 ->whereNotNull('published_at')
+                 ->where('published_at', '<=', now());
+    }
 }

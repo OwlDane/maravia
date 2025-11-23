@@ -261,11 +261,6 @@
                                                 @endif
                                             </button>
 
-                                            <a href="{{ route('admin.tags.show', $tag) }}" 
-                                               class="bg-gradient-to-r from-orange-400 to-amber-400 hover:from-orange-500 hover:to-amber-500 text-white p-3 rounded-xl transition-all duration-300 transform hover:scale-110 shadow-lg">
-                                                <i class="fas fa-eye text-sm"></i>
-                                            </a>
-
                                             <a href="{{ route('admin.tags.edit', $tag) }}" 
                                                class="bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 text-white p-3 rounded-xl transition-all duration-300 transform hover:scale-110 shadow-lg">
                                                 <i class="fas fa-edit text-sm"></i>
@@ -379,16 +374,12 @@ function toggleActive(tagId) {
 }
 
 function deleteTag(tagId) {
-    if (confirm('Are you sure you want to delete this tag? Tags with photos cannot be deleted.')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/admin/tags/${tagId}`;
-        form.innerHTML = `
-            <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]').content}">
-            <input type="hidden" name="_method" value="DELETE">
-        `;
-        document.body.appendChild(form);
-        form.submit();
+    if (typeof showDeleteModal === 'function') {
+        showDeleteModal({
+            message: 'Are you sure you want to delete this tag? Tags with photos cannot be deleted.',
+            action: `/admin/tags/${tagId}`,
+            method: 'DELETE'
+        });
     }
 }
 </script>

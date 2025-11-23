@@ -7,6 +7,8 @@ use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class ArticleController extends Controller
 {
@@ -44,8 +46,24 @@ class ArticleController extends Controller
         $article->slug = Str::slug($request->title).'-'.Str::random(6);
         $article->excerpt = $request->excerpt;
         $article->content = $request->content;
-        $article->is_published = $request->boolean('is_published');
-        $article->published_at = $request->published_at;
+
+        $isPublished = $request->boolean('is_published');
+        $publishedAt = $request->published_at ? Carbon::parse($request->published_at) : null;
+        // If publish now checked and no date provided, set now
+        if ($isPublished && ! $publishedAt) {
+            $publishedAt = now();
+        }
+        // If publish now checked but date is in the future, override to now (publish immediately)
+        if ($isPublished && $publishedAt && $publishedAt->isFuture()) {
+            $publishedAt = now();
+        }
+        // If not publish now and date is in future, keep as draft until the date passes
+        if (! $isPublished && $publishedAt && $publishedAt->isFuture()) {
+            $isPublished = false;
+        }
+
+        $article->is_published = $isPublished;
+        $article->published_at = $publishedAt;
         $article->author_id = auth()->id();
 
         if ($request->hasFile('cover')) {
@@ -54,6 +72,12 @@ class ArticleController extends Controller
         }
 
         $article->save();
+        // Log activity
+        if ($admin = Auth::guard('admin')->user()) {
+            $admin->recordActivity('article_created', $article, [
+                'title' => $article->title,
+            ]);
+        }
         return redirect()->route('admin.articles.index')->with('success','Article created');
     }
 
@@ -73,14 +97,27 @@ class ArticleController extends Controller
             'published_at' => 'nullable|date',
         ]);
 
+        $originalTitle = $article->title;
         $article->title = $request->title;
-        if ($article->title !== $request->title) {
+        if ($originalTitle !== $request->title) {
             $article->slug = Str::slug($request->title).'-'.Str::random(6);
         }
         $article->excerpt = $request->excerpt;
         $article->content = $request->content;
-        $article->is_published = $request->boolean('is_published');
-        $article->published_at = $request->published_at;
+
+        $isPublished = $request->boolean('is_published');
+        $publishedAt = $request->published_at ? Carbon::parse($request->published_at) : null;
+        if ($isPublished && ! $publishedAt) {
+            $publishedAt = now();
+        }
+        if ($isPublished && $publishedAt && $publishedAt->isFuture()) {
+            $publishedAt = now();
+        }
+        if (! $isPublished && $publishedAt && $publishedAt->isFuture()) {
+            $isPublished = false;
+        }
+        $article->is_published = $isPublished;
+        $article->published_at = $publishedAt;
 
         if ($request->hasFile('cover')) {
             if ($article->cover_image) Storage::disk('public')->delete($article->cover_image);
@@ -89,13 +126,24 @@ class ArticleController extends Controller
         }
 
         $article->save();
+        if ($admin = Auth::guard('admin')->user()) {
+            $admin->recordActivity('article_updated', $article, [
+                'title' => $article->title,
+            ]);
+        }
         return redirect()->route('admin.articles.index')->with('success','Article updated');
     }
 
     public function destroy(Article $article)
     {
         if ($article->cover_image) Storage::disk('public')->delete($article->cover_image);
+        $title = $article->title;
         $article->delete();
+        if ($admin = Auth::guard('admin')->user()) {
+            $admin->recordActivity('article_deleted', null, [
+                'title' => $title,
+            ]);
+        }
         return redirect()->route('admin.articles.index')->with('success','Article deleted');
     }
 }

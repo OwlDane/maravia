@@ -8,9 +8,12 @@ use App\Models\User;
 use App\Models\UserCollection;
 use App\Models\UserAchievement;
 use App\Models\PhotoRating;
+use App\Models\PhotoComment;
+use App\Models\Testimonial;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Schema;
 
 class UserDashboardController extends Controller
 {
@@ -60,11 +63,19 @@ class UserDashboardController extends Controller
             ->take(4)
             ->get();
         
-        // Get achievement progress
-        $achievementProgress = $this->getAchievementProgress($user);
-        
-        // Get leaderboard position
-        $leaderboardPosition = $this->getLeaderboardPosition($user);
+        // User's recent comments (fallback to email if user_id column missing)
+        $userCommentsQuery = PhotoComment::query();
+        if (Schema::hasColumn('photo_comments', 'user_id')) {
+            $userCommentsQuery->where('user_id', $user->id);
+        } else {
+            $userCommentsQuery->where('email', $user->email);
+        }
+        $userComments = $userCommentsQuery->with('photo')->latest()->take(5)->get();
+
+        // User testimonial by email (latest)
+        $userTestimonial = Testimonial::where('email', $user->email)
+            ->latest()
+            ->first();
         
         return view('user.dashboard', compact(
             'user',
@@ -72,8 +83,8 @@ class UserDashboardController extends Controller
             'recommendedPhotos',
             'recentFavorites',
             'collections',
-            'achievementProgress',
-            'leaderboardPosition'
+            'userComments',
+            'userTestimonial'
         ));
     }
 

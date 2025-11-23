@@ -54,7 +54,7 @@
             @if(request('category'))
                 <span class="inline-flex items-center px-4 py-2 bg-primary-100 text-primary-800 rounded-full text-sm font-medium">
                     <i class="fas fa-folder mr-2"></i>
-                    {{ $categories->where('id', request('category'))->first()->name ?? 'Kategori' }}
+                    {{ optional($categories->where('id', request('category'))->first())->name ?? 'Kategori' }}
                     <a href="{{ request()->fullUrlWithQuery(['category' => null]) }}" class="ml-2 text-primary-600 hover:text-primary-800">
                         <i class="fas fa-times"></i>
                     </a>
@@ -74,42 +74,7 @@
     </div>
 </section>
 
-<!-- ZONES Navigation -->
-<section class="py-6 bg-white border-b border-gray-100">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-wrap justify-center gap-4">
-            <a href="{{ route('gallery') }}" 
-               class="zone-btn {{ !request()->hasAny(['category', 'zone']) ? 'active' : '' }}">
-                <i class="fas fa-th-large mr-2"></i>
-                Semua ZONA
-            </a>
-            
-            <a href="{{ route('gallery', ['zone' => 'ekskul']) }}" 
-               class="zone-btn {{ request('zone') == 'ekskul' ? 'active' : '' }}">
-                <i class="fas fa-star mr-2"></i>
-                ZONA EKSKUL
-            </a>
-            
-            <a href="{{ route('gallery', ['zone' => 'prestasi']) }}" 
-               class="zone-btn {{ request('zone') == 'prestasi' ? 'active' : '' }}">
-                <i class="fas fa-trophy mr-2"></i>
-                ZONA PRESTASI
-            </a>
-            
-            <a href="{{ route('gallery', ['zone' => 'class-moment']) }}" 
-               class="zone-btn {{ request('zone') == 'class-moment' ? 'active' : '' }}">
-                <i class="fas fa-users mr-2"></i>
-                ZONA CLASS MOMENT
-            </a>
-            
-            <a href="{{ route('gallery', ['zone' => 'acara-besar']) }}" 
-               class="zone-btn {{ request('zone') == 'acara-besar' ? 'active' : '' }}">
-                <i class="fas fa-calendar-alt mr-2"></i>
-                ZONA ACARA BESAR
-            </a>
-        </div>
-    </div>
-</section>
+ 
 
 <!-- Photos Grid -->
 <section class="py-8">
@@ -118,40 +83,50 @@
             <div id="photosContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 @foreach($photos as $photo)
                     <div class="photo-item group" data-photo-id="{{ $photo->id }}">
-                        <div class="relative overflow-hidden rounded-2xl bg-white shadow-lg hover-lift">
+                        <div class="relative overflow-hidden rounded-2xl bg-white shadow-lg hover-lift"
+                             data-like-url="{{ route('user.photos.favorite', $photo) }}"
+                             data-detail-url="{{ route('gallery.photo', $photo) }}"
+                             data-download-url="{{ route('download.photo', $photo) }}?size=original">
                             <!-- Photo Image -->
-                            <div class="aspect-w-16 aspect-h-12 overflow-hidden">
+                            <div class="aspect-w-16 aspect-h-12 overflow-hidden relative">
                                 <img src="{{ url('/api/photos/' . $photo->id . '/thumbnail') }}" 
                                      alt="{{ $photo->title }}" 
-                                     class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500 cursor-pointer"
-                                     onclick="openLightbox({{ $photo->id }})"
+                                     class="w-full h-64 object-cover transition-transform duration-500"
                                      onerror="this.onerror=null; this.src='{{ url('/api/photos/' . $photo->id . '/image') }}'; console.log('Thumbnail failed, using original via API');"
                                      onload="console.log('Image loaded successfully via API:', this.src);">
-                            </div>
-                            
-                            <!-- Overlay Info -->
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
-                                    <h3 class="font-semibold text-lg mb-2">{{ $photo->title }}</h3>
-                                    <div class="flex items-center justify-between">
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-500 text-white">
-                                            {{ $photo->category->name }}
-                                        </span>
-                                        <button onclick="downloadPhoto({{ $photo->id }})" 
-                                                class="text-yellow-300 hover:text-yellow-200 transition-colors"
-                                                title="Download dengan watermark">
-                                            <i class="fas fa-download"></i>
-                                        </button>
-                                    </div>
+                                <!-- Click-through overlay to open detail page -->
+                                <a href="{{ route('gallery.photo', $photo) }}" class="absolute inset-0 z-0 cursor-pointer" aria-label="Buka detail foto"></a>
+                                <!-- Floating action buttons (top-right) -->
+                                <div class="absolute top-3 right-3 flex items-center gap-2 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 pointer-events-auto" onclick="event.stopPropagation();">
+                                    @php $liked = auth()->check() ? (($photo->is_favorited ?? 0) > 0) : false; @endphp
+                                    <button type="button" class="action-btn w-10 h-10 rounded-full border border-white/70 flex items-center justify-center {{ $liked ? 'bg-red-500 text-white' : 'bg-white/90 text-gray-800 hover:bg-white' }}" title="Suka" onclick="likeFromCard(event, this)" data-no-lightbox="true">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button type="button" class="action-btn w-10 h-10 rounded-full bg-white/90 text-gray-800 hover:bg-white border border-white/70 flex items-center justify-center" title="Komentar" onclick="openDetailFromCard(event, this)" data-no-lightbox="true">
+                                        <i class="fas fa-comment"></i>
+                                    </button>
                                 </div>
+                                <!-- Views badge top-left -->
+                                <div class="absolute top-3 left-3 z-10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-black/60 text-white backdrop-blur">
+                                        <i class="fas fa-eye mr-1"></i>{{ $photo->view_count ?? 0 }} views
+                                    </span>
+                                </div>
+                                <!-- Download button bottom-right (also appears on hover) -->
+                                <button type="button" class="download-btn absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/95 text-yellow-600 hover:text-yellow-700 border border-white/70 flex items-center justify-center z-20 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 pointer-events-auto" title="Download" onclick="downloadFromCard(event, this)" onmousedown="event.stopPropagation();" onmouseup="event.stopPropagation();" data-no-lightbox="true">
+                                    <i class="fas fa-download"></i>
+                                </button>
                             </div>
                             
-                            <!-- Photo Info -->
-                            <div class="p-4">
-                                <h4 class="font-semibold text-gray-900 mb-2 truncate">{{ $photo->title }}</h4>
-                                <div class="flex items-center justify-between text-sm text-gray-500">
-                                    <span>{{ $photo->created_at->format('d M Y') }}</span>
-                                    <span>{{ $photo->view_count }} views</span>
+                            <!-- Bottom Info (only on hover on md+, always visible title on small) -->
+                            <div class="absolute inset-0 flex items-end opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                                <div class="absolute bottom-0 left-0 right-0 p-4 pr-28 text-white">
+                                    <div class="bg-black/55 rounded-xl p-3">
+                                        <h3 class="text-base font-semibold text-white mb-1 line-clamp-1">{{ $photo->title }}</h3>
+                                        <div class="flex items-center justify-start">
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-coral-500 text-white">{{ $photo->category?->name ?? 'Umum' }}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -179,41 +154,7 @@
     </div>
 </section>
 
-<!-- Lightbox Modal -->
-<div id="lightboxModal" class="fixed inset-0 bg-black/95 z-50 hidden">
-    <div class="relative w-full h-full flex items-center justify-center">
-        <!-- Close Button -->
-        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-2xl hover:text-gray-300 transition-colors z-10">
-            <i class="fas fa-times"></i>
-        </button>
-        
-        <!-- Navigation Arrows -->
-        <button onclick="previousPhoto()" class="absolute left-6 top-1/2 transform -translate-y-1/2 text-white text-3xl hover:text-gray-300 transition-colors z-10">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-        <button onclick="nextPhoto()" class="absolute right-6 top-1/2 transform -translate-y-1/2 text-white text-3xl hover:text-gray-300 transition-colors z-10">
-            <i class="fas fa-chevron-right"></i>
-        </button>
-        
-        <!-- Photo Container -->
-        <div class="max-w-6xl max-h-full mx-auto p-6">
-            <img id="lightboxImage" src="" alt="" class="max-w-full max-h-[80vh] object-contain mx-auto">
-            
-            <!-- Photo Info -->
-            <div class="mt-6 text-center text-white">
-                <h3 id="lightboxTitle" class="text-2xl font-bold mb-2"></h3>
-                <div class="flex justify-center gap-4">
-                    <button onclick="toggleSlideshow()" id="slideshowBtn" class="text-yellow-300 hover:text-yellow-200">
-                        <i class="fas fa-play mr-2"></i>Slideshow
-                    </button>
-                    <button onclick="downloadCurrentPhoto()" class="text-green-300 hover:text-green-200">
-                        <i class="fas fa-download mr-2"></i>Download
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Lightbox removed intentionally -->
 @endsection
 
 @push('styles')
@@ -229,81 +170,105 @@
     .hover-lift:hover {
         @apply transform -translate-y-1 shadow-xl;
     }
+    /* Actions overlay visibility toggled by parent .show-actions */
+    .show-actions .actions-overlay { opacity: 1 !important; pointer-events: auto !important; }
 </style>
 @endpush
 
 @push('scripts')
 <script>
-    let currentPhotoIndex = 0;
-    let photosData = @json($photos->items());
-    let slideshowInterval = null;
+    window.AuthLoggedIn = {{ auth()->check() ? 'true' : 'false' }};
     
-    function openLightbox(photoId) {
-        const photoIndex = photosData.findIndex(photo => photo.id === photoId);
-        if (photoIndex !== -1) {
-            currentPhotoIndex = photoIndex;
-            showPhoto(currentPhotoIndex);
-            document.getElementById('lightboxModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
+    function forceDownload(url, name){
+        const a = document.createElement('a');
+        a.href = url;
+        a.setAttribute('download', name || 'photo.jpg');
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
     }
-    
-    function closeLightbox() {
-        document.getElementById('lightboxModal').classList.add('hidden');
-        document.body.style.overflow = 'auto';
-        if (slideshowInterval) clearInterval(slideshowInterval);
-    }
-    
-    function showPhoto(index) {
-        if (index < 0 || index >= photosData.length) return;
-        const photo = photosData[index];
-        document.getElementById('lightboxImage').src = photo.url;
-        document.getElementById('lightboxTitle').textContent = photo.title;
-    }
-    
-    function previousPhoto() {
-        currentPhotoIndex = (currentPhotoIndex - 1 + photosData.length) % photosData.length;
-        showPhoto(currentPhotoIndex);
-    }
-    
-    function nextPhoto() {
-        currentPhotoIndex = (currentPhotoIndex + 1) % photosData.length;
-        showPhoto(currentPhotoIndex);
-    }
-    
-    function toggleSlideshow() {
-        if (slideshowInterval) {
-            clearInterval(slideshowInterval);
-            slideshowInterval = null;
-            document.getElementById('slideshowBtn').innerHTML = '<i class="fas fa-play mr-2"></i>Slideshow';
-        } else {
-            slideshowInterval = setInterval(() => {
-                nextPhoto();
-            }, 3000);
-            document.getElementById('slideshowBtn').innerHTML = '<i class="fas fa-pause mr-2"></i>Stop';
-        }
-    }
-    
-    function downloadPhoto(photoId) {
-        window.open(`/photo/${photoId}/download`, '_blank');
-    }
-    
-    function downloadCurrentPhoto() {
-        if (photosData[currentPhotoIndex]) {
-            downloadPhoto(photosData[currentPhotoIndex].id);
-        }
-    }
-    
-    // Keyboard Navigation
-    document.addEventListener('keydown', function(e) {
-        if (!document.getElementById('lightboxModal').classList.contains('hidden')) {
-            switch(e.key) {
-                case 'Escape': closeLightbox(); break;
-                case 'ArrowLeft': previousPhoto(); break;
-                case 'ArrowRight': nextPhoto(); break;
-                case ' ': e.preventDefault(); toggleSlideshow(); break;
+
+    function downloadFromCard(e, btn) {
+        if (e) { e.preventDefault(); e.stopPropagation(); }
+        const card = btn.closest('[data-download-url]');
+        const url = card?.dataset.downloadUrl;
+        if (url){
+            const container = btn.closest('.photo-item');
+            const titleEl = container ? container.querySelector('h3') : null;
+            const title = titleEl?.textContent?.trim() || 'photo';
+            try {
+                forceDownload(url, `${title}.jpg`);
+                // Fallback navigation (in case browser blocks programmatic click)
+                setTimeout(()=>{ window.location.href = url; }, 150);
+            } catch(err){
+                console.error('Download error', err);
+                showToast('Gagal mengunduh file');
             }
         }
-    });
+    }
+    
+    // Lightbox functions removed
+    // Like handler (auth only)
+    function likeFromCard(e, btn){
+        if (e) { e.preventDefault(); e.stopPropagation(); }
+        const card = btn.closest('[data-like-url]');
+        const url = card?.dataset.likeUrl;
+        if (!url) return;
+        if (!window.AuthLoggedIn){ window.location.href='{{ route('login') }}'; return; }
+        fetch(url, { method: 'POST', credentials: 'same-origin', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept':'application/json', 'X-Requested-With':'XMLHttpRequest' }})
+            .then(async r=>{
+                if(r.status===401){ window.location.href='{{ route('login') }}'; return; }
+                let data = {};
+                try { data = await r.json(); } catch(_) {}
+                const active = data && typeof data.favorited !== 'undefined' ? !!data.favorited : !btn.classList.contains('bg-red-500');
+                btn.classList.toggle('bg-red-500', active);
+                btn.classList.toggle('text-white', active);
+                showToast(active ? 'Disukai' : 'Batal suka');
+            })
+            .catch((err)=>{ 
+                console.error(err); 
+                // Fallback: create a form and submit POST normally
+                try{
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = url;
+                    const token = document.createElement('input');
+                    token.type = 'hidden'; token.name = '_token';
+                    token.value = document.querySelector('meta[name="csrf-token"]').content;
+                    form.appendChild(token);
+                    document.body.appendChild(form);
+                    form.submit();
+                } catch(_e) {
+                    showToast('Aksi gagal');
+                }
+            });
+    }
+    // Open detail to comments section
+    function openDetailFromCard(e, btn){
+        if (e) { e.preventDefault(); e.stopPropagation(); }
+        const card = btn.closest('[data-detail-url]');
+        const url = card?.dataset.detailUrl;
+        if (url) window.location.href = url + '#comments';
+    }
+    // No lightbox: global listeners not needed
+
+    // Simple toast helper
+    function showToast(message){
+        let box = document.getElementById('toast-box');
+        if(!box){
+            box = document.createElement('div');
+            box.id = 'toast-box';
+            box.style.position = 'fixed';
+            box.style.right = '16px';
+            box.style.bottom = '16px';
+            box.style.zIndex = '9999';
+            document.body.appendChild(box);
+        }
+        const el = document.createElement('div');
+        el.className = 'mb-2 px-4 py-2 rounded-xl text-white bg-primary-600 shadow-lg';
+        el.textContent = message;
+        box.appendChild(el);
+        setTimeout(()=>{ el.remove(); if(!box.childElementCount) box.remove(); }, 1800);
+    }
 </script>
 @endpush

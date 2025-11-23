@@ -96,7 +96,7 @@
                                 <option value="name" {{ request('sort') === 'name' ? 'selected' : '' }}>Name A-Z</option>
                                 <option value="latest" {{ request('sort') === 'latest' ? 'selected' : '' }}>Latest First</option>
                                 <option value="oldest" {{ request('sort') === 'oldest' ? 'selected' : '' }}>Oldest First</option>
-                                <option value="photos_count" {{ request('sort') === 'photos_count' ? 'selected' : '' }}>Most Photos</option>
+                                <option value="photos" {{ request('sort') === 'photos' ? 'selected' : '' }}>Most Photos</option>
                             </select>
                         </div>
                     </div>
@@ -201,16 +201,12 @@
 @push('scripts')
 <script>
 function deleteCategory(categoryId) {
-    if (confirm('Are you sure you want to delete this category? This action cannot be undone and will affect all photos in this category.')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/admin/categories/${categoryId}`;
-        form.innerHTML = `
-            <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]').content}">
-            <input type="hidden" name="_method" value="DELETE">
-        `;
-        document.body.appendChild(form);
-        form.submit();
+    if (typeof showDeleteModal === 'function') {
+        showDeleteModal({
+            message: 'Are you sure you want to delete this category? This action cannot be undone and will affect all photos in this category.',
+            action: `/admin/categories/${categoryId}`,
+            method: 'DELETE'
+        });
     }
 }
 </script>

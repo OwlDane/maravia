@@ -3,63 +3,13 @@
 @section('title', 'Dashboard - ' . config('app.name'))
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-50">
-    <!-- Welcome Header with Level Progress -->
-    <div class="bg-gradient-to-r from-blue-500 to-sky-600 text-white">
+<div class="min-h-screen bg-gray-50">
+    <!-- Welcome Header -->
+    <div class="bg-primary-600 text-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                <!-- User Profile Section -->
-                <div class="flex items-center space-x-6">
-                    <div class="relative">
-                        <img src="{{ $user->avatar_url }}"
-                             alt="{{ $user->name }}"
-                             class="w-20 h-20 rounded-full border-4 border-white shadow-lg">
-                        <div class="absolute -bottom-2 -right-2 bg-yellow-400 text-yellow-900 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold shadow-lg">
-                            {{ $user->user_level }}
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        <h1 class="text-2xl lg:text-3xl font-bold">
-                            Selamat datang, {{ $user->name }}! 👋
-                        </h1>
-                        <p class="text-blue-100 text-sm lg:text-base">
-                            Level {{ $user->user_level }} Explorer
-                        </p>
-
-                        <!-- Level Progress Bar -->
-                        <div class="mt-3">
-                            <div class="bg-white/20 rounded-full h-3 w-48 lg:w-64">
-                                <div class="bg-gradient-to-r from-yellow-400 to-orange-400 h-3 rounded-full transition-all duration-500"
-                                     style="width: {{ $user->progress_to_next_level }}%"></div>
-                            </div>
-                            <p class="text-xs text-blue-100 mt-1">
-                                {{ $user->progress_to_next_level }}% menuju Level {{ $user->user_level + 1 }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Stats Section -->
-                <div class="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-4 lg:gap-6">
-                    <div class="text-center">
-                        <div class="text-xl lg:text-2xl font-bold">
-                            {{ $user->stats->achievement_points ?? 0 }}
-                        </div>
-                        <div class="text-xs text-blue-100">Points</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-xl lg:text-2xl font-bold">
-                            {{ $user->achievements->count() }}
-                        </div>
-                        <div class="text-xs text-blue-100">Badges</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-xl lg:text-2xl font-bold">
-                            #{{ $leaderboardPosition['position'] ?? '?' }}
-                        </div>
-                        <div class="text-xs text-blue-100">Ranking</div>
-                    </div>
-                </div>
+            <div class="flex items-center gap-4">
+                <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="w-16 h-16 rounded-full border-4 border-white shadow-lg">
+                <h1 class="text-2xl lg:text-3xl font-bold">Selamat datang, {{ $user->name }}! 👋</h1>
             </div>
         </div>
     </div>
@@ -68,149 +18,9 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-            <!-- Left Column - Stats & Achievements -->
+            <!-- Left Column -->
             <div class="lg:col-span-2 space-y-8">
-
-                <!-- Interactive Stats Cards -->
-                <div id="stats-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- Views Card -->
-                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-600 text-sm mb-1">Total Views</p>
-                                <p class="text-2xl font-bold text-gray-900 counter" data-target="{{ $user->stats->total_views ?? 0 }}">0</p>
-                            </div>
-                            <div class="text-3xl text-blue-500">
-                                <i class="fas fa-eye"></i>
-                            </div>
-                        </div>
-                        <div class="mt-4 flex items-center text-blue-600 text-xs font-medium">
-                            <i class="fas fa-arrow-up mr-1"></i>
-                            <span>+12% dari minggu lalu</span>
-                        </div>
-                    </div>
-
-                    <!-- Favorites Card -->
-                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-600 text-sm mb-1">Favorites</p>
-                                <p class="text-2xl font-bold text-gray-900 counter" data-target="{{ $user->stats->total_favorites ?? 0 }}">0</p>
-                            </div>
-                            <div class="text-3xl text-red-500">
-                                <i class="fas fa-heart"></i>
-                            </div>
-                        </div>
-                        <div class="mt-4 flex items-center text-blue-600 text-xs font-medium">
-                            <i class="fas fa-plus mr-1"></i>
-                            <span>{{ $recentFavorites->count() }} foto baru</span>
-                        </div>
-                    </div>
-
-                    <!-- Downloads Card -->
-                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-600 text-sm mb-1">Downloads</p>
-                                <p class="text-2xl font-bold text-gray-900 counter" data-target="{{ $user->stats->total_downloads ?? 0 }}">0</p>
-                            </div>
-                            <div class="text-3xl text-green-500">
-                                <i class="fas fa-download"></i>
-                            </div>
-                        </div>
-                        <div class="mt-4 flex items-center text-blue-600 text-xs font-medium">
-                            <i class="fas fa-chart-line mr-1"></i>
-                            <span>Trending naik</span>
-                        </div>
-                    </div>
-
-                    <!-- Collections Card -->
-                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-600 text-sm mb-1">Collections</p>
-                                <p class="text-2xl font-bold text-gray-900 counter" data-target="{{ $user->stats->total_collections ?? 0 }}">0</p>
-                            </div>
-                            <div class="text-3xl text-purple-500">
-                                <i class="fas fa-folder"></i>
-                            </div>
-                        </div>
-                        <div class="mt-4 flex items-center text-blue-600 text-xs font-medium">
-                            <i class="fas fa-star mr-1"></i>
-                            <span>{{ $collections->count() }} aktif</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Achievement Showcase -->
-                <div id="achievements-section" class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-xl font-bold text-gray-900 flex items-center">
-                            <i class="fas fa-trophy text-yellow-500 mr-2"></i>
-                            Achievement Gallery
-                        </h2>
-                        <button class="text-blue-600 hover:text-blue-800 font-semibold text-sm">
-                            View All →
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        @foreach($achievementProgress as $achievement)
-                            <div class="achievement-card {{ $achievement['earned'] ? 'earned' : 'locked' }}"
-                                 data-achievement="{{ $achievement['type'] }}">
-                                <!-- Achievement Card Container -->
-                                <div class="h-full min-h-[200px] p-4 rounded-xl transition-all duration-300 hover:scale-105 cursor-pointer border-2
-                                           {{ $achievement['earned']
-                                               ? 'bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200 shadow-md'
-                                               : 'bg-gray-50 border-gray-200 hover:border-gray-300' }}">
-
-                                    <!-- Icon Section -->
-                                    <div class="text-center mb-3">
-                                        <div class="w-12 h-12 mx-auto rounded-full flex items-center justify-center mb-2
-                                                   {{ $achievement['earned'] ? 'bg-yellow-100' : 'bg-gray-200' }}">
-                                            <i class="{{ $achievement['icon'] }} text-xl
-                                                     {{ $achievement['earned'] ? 'text-yellow-600' : 'text-gray-400' }}"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- Content Section -->
-                                    <div class="text-center flex-1 flex flex-col justify-between">
-                                        <div>
-                                            <h4 class="font-bold text-sm text-gray-900 mb-1 leading-tight">
-                                                {{ $achievement['name'] }}
-                                            </h4>
-                                            <p class="text-xs text-gray-600 mb-3 leading-relaxed">
-                                                {{ $achievement['description'] }}
-                                            </p>
-                                        </div>
-
-                                        <!-- Status Section -->
-                                        <div class="mt-auto">
-                                            @if(!$achievement['earned'])
-                                                <!-- Progress Bar -->
-                                                <div class="mb-2">
-                                                    <div class="bg-gray-200 rounded-full h-2 mb-1">
-                                                        <div class="bg-blue-500 h-2 rounded-full transition-all duration-500"
-                                                             style="width: {{ $achievement['progress'] }}%"></div>
-                                                    </div>
-                                                    <p class="text-xs text-gray-500">{{ $achievement['progress'] }}%</p>
-                                                </div>
-                                            @else
-                                                <!-- Points Badge -->
-                                                <div class="flex items-center justify-center">
-                                                    <span class="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-                                                        +{{ $achievement['points'] }} pts
-                                                    </span>
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-
+                
                 <!-- Recent Favorites -->
                 @if($recentFavorites->count() > 0)
                 <div id="favorites-section" class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
@@ -251,48 +61,71 @@
                     </div>
                 </div>
                 @endif
-            </div>
 
-            <!-- Right Column - Activity & Quick Actions -->
-            <div class="space-y-8">
-
-                <!-- Quick Actions -->
+                <!-- Komentar Saya -->
                 <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                     <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                        <i class="fas fa-bolt text-yellow-500 mr-2"></i>
-                        Quick Actions
+                        <i class="fas fa-comments text-primary-600 mr-2"></i>
+                        Komentar Saya
                     </h3>
+                    @if($userComments->count())
+                        <div class="space-y-4">
+                            @foreach($userComments as $c)
+                                <div class="flex items-start gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+                                        @if($c->photo)
+                                            <img src="{{ route('api.photos.thumbnail', $c->photo) }}" alt="{{ $c->photo->title }}" class="w-full h-full object-cover">
+                                        @else
+                                            <i class="fas fa-image text-gray-400"></i>
+                                        @endif
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm text-gray-800">{{ $c->comment }}</p>
+                                        @if($c->photo)
+                                            <a href="{{ route('gallery.photo', $c->photo) }}" class="text-xs text-primary-600 hover:underline">{{ $c->photo->title }}</a>
+                                        @endif
+                                        <div class="text-xs text-gray-400">{{ $c->created_at->diffForHumans() }}</div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-sm text-gray-500">Belum ada komentar.</div>
+                    @endif
+                </div>
+            </div>
 
-                    <div class="space-y-3">
-                        <button onclick="createCollection()"
-                                class="w-full bg-gradient-to-r from-blue-500 to-sky-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-blue-600 hover:to-sky-700 transition-all duration-300 flex items-center justify-center">
-                            <i class="fas fa-folder-plus mr-2"></i>
-                            Buat Koleksi Baru
-                        </button>
+            <!-- Right Column -->
+            <div class="space-y-8">
 
-                        <button onclick="explorePhotos()"
-                                class="w-full bg-gradient-to-r from-blue-500 to-sky-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-blue-600 hover:to-sky-700 transition-all duration-300 flex items-center justify-center">
-                            <i class="fas fa-compass mr-2"></i>
-                            Jelajahi Foto
-                        </button>
-
-                        <button onclick="viewLeaderboard()"
-                                class="w-full bg-gradient-to-r from-blue-500 to-sky-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-blue-600 hover:to-sky-700 transition-all duration-300 flex items-center justify-center">
-                            <i class="fas fa-trophy mr-2"></i>
-                            Leaderboard
-                        </button>
+                <!-- Testimoni Saya -->
+                @if($userTestimonial)
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2 flex items-center">
+                        <i class="fas fa-quote-left text-primary-600 mr-2"></i>
+                        Testimoni Saya
+                    </h3>
+                    <p class="text-sm text-gray-700">{{ $userTestimonial->message }}</p>
+                    <div class="mt-3 text-xs">
+                        @if($userTestimonial->is_approved)
+                            <span class="px-2 py-1 rounded-full bg-green-100 text-green-700">Disetujui</span>
+                        @else
+                            <span class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">Menunggu persetujuan</span>
+                        @endif
+                        <span class="text-gray-400 ml-2">{{ $userTestimonial->created_at->diffForHumans() }}</span>
                     </div>
                 </div>
+                @endif
 
                 <!-- Collections Preview -->
                 @if($collections->count() > 0)
                 <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-xl font-bold text-gray-900 flex items-center">
-                            <i class="fas fa-folder text-blue-500 mr-2"></i>
+                            <i class="fas fa-folder text-primary-600 mr-2"></i>
                             Koleksi Saya
                         </h3>
-                        <a href="{{ route('user.collections.index') }}" class="text-blue-600 hover:text-blue-800 text-sm font-semibold">
+                        <a href="{{ route('user.collections.index') }}" class="text-primary-600 hover:text-primary-700 text-sm font-semibold">
                             Lihat Semua →
                         </a>
                     </div>
@@ -301,7 +134,7 @@
                         @foreach($collections as $collection)
                             <div class="flex items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
                                  onclick="viewCollection({{ $collection->id }})">
-                                <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-sky-500 rounded-lg flex items-center justify-center text-white mr-3">
+                                <div class="w-12 h-12 bg-primary-600 rounded-lg flex items-center justify-center text-white mr-3">
                                     <i class="fas fa-images"></i>
                                 </div>
                                 <div class="flex-1">
@@ -318,7 +151,7 @@
                 <!-- Recent Activity -->
                 <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                     <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                        <i class="fas fa-clock text-blue-500 mr-2"></i>
+                        <i class="fas fa-clock text-primary-600 mr-2"></i>
                         Aktivitas Terbaru
                     </h3>
 
@@ -356,10 +189,10 @@
             <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl font-bold text-gray-900 flex items-center">
-                        <i class="fas fa-magic text-purple-500 mr-2"></i>
+                        <i class="fas fa-magic text-primary-600 mr-2"></i>
                         Rekomendasi Untuk Anda
                     </h2>
-                    <button class="text-blue-600 hover:text-blue-800 font-semibold text-sm">
+                    <button class="text-primary-600 hover:text-primary-700 font-semibold text-sm">
                         Refresh →
                     </button>
                 </div>
@@ -428,61 +261,11 @@
 
 @push('scripts')
 <script>
-    // Counter animation
     document.addEventListener('DOMContentLoaded', function() {
-        const counters = document.querySelectorAll('.counter');
-
-        counters.forEach(counter => {
-            const target = parseInt(counter.getAttribute('data-target'));
-            const duration = 2000;
-            const step = target / (duration / 16);
-            let current = 0;
-
-            const timer = setInterval(() => {
-                current += step;
-                if (current >= target) {
-                    counter.textContent = target;
-                    clearInterval(timer);
-                } else {
-                    counter.textContent = Math.floor(current);
-                }
-            }, 16);
-        });
-
-        // Animate stat cards on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.animationDelay = `${Math.random() * 0.5}s`;
-                    entry.target.classList.add('animate-bounce-in');
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.bg-white.rounded-2xl').forEach(card => {
-            observer.observe(card);
-        });
+        // Basic card appearance animation can be added later if needed
     });
 
     // Interactive functions
-    function createCollection() {
-        // This will open a modal to create new collection
-        alert('Feature akan segera hadir!');
-    }
-
-    function explorePhotos() {
-        window.location.href = '{{ route("gallery") }}';
-    }
-
-    function viewLeaderboard() {
-        alert('Leaderboard akan segera hadir!');
-    }
-
     function viewCollection(id) {
         alert('View collection ' + id);
     }

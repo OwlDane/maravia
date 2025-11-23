@@ -5,18 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'Admin') - {{ config('app.name', 'GaGaleri') }}</title>
+    <title>@yield('title', 'Admin') - {{ config('app.name', 'Maravia') }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Scripts -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Scripts / Styles -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="{{ asset('css/theme.css') }}" rel="stylesheet">
     <link href="{{ asset('css/modern-teal.css') }}" rel="stylesheet">
+    <style>
+        .modern-toast { border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); color: #1C1C1C; background: #fff; }
+        .modern-toast.success { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+        .modern-toast.error { background: #FF6F61; color: #fff; border: 1px solid #ffb3ab; }
+        .modern-toast.info { background: #FEEA77; color: #1C1C1C; border: 1px solid #FCD34D; }
+    </style>
+    @stack('styles')
 </head>
 <body class="min-h-screen">
 
@@ -33,7 +40,7 @@
                              class="w-6 h-6 object-cover">
                     </div>
                     <div>
-                        <h2 class="modern-title">GaGaleri</h2>
+                        <h2 class="modern-title">Maravia</h2>
                         <p class="modern-subtitle">Admin Dashboard</p>
                     </div>
                 </div>
@@ -51,10 +58,7 @@
                     <span>Photos</span>
                 </a>
 
-                <a href="{{ route('admin.videos.index') }}" class="modern-nav-item {{ request()->routeIs('admin.videos.*') ? 'active' : '' }}">
-                    <i class="fas fa-video"></i>
-                    <span>Videos</span>
-                </a>
+
 
                 <a href="{{ route('admin.articles.index') }}" class="modern-nav-item {{ request()->routeIs('admin.articles.*') ? 'active' : '' }}">
                     <i class="fas fa-newspaper"></i>
@@ -81,10 +85,7 @@
                     <span>Testimonials</span>
                 </a>
 
-                <a href="{{ route('admin.pages.index') }}" class="modern-nav-item {{ request()->routeIs('admin.pages.*') ? 'active' : '' }}">
-                    <i class="fas fa-file-alt"></i>
-                    <span>Pages</span>
-                </a>
+                
 
                 <hr class="modern-divider">
 
@@ -93,21 +94,18 @@
                     <span>Backup</span>
                 </a>
 
-                <a href="{{ route('admin.admins') }}" class="modern-nav-item {{ request()->routeIs('admin.admins') ? 'active' : '' }}">
-                    <i class="fas fa-users-cog"></i>
-                    <span>Admins</span>
-                </a>
+                
             </nav>
 
             <!-- User Info -->
             <div class="modern-user-section">
                 <div class="flex items-center space-x-3 mb-4">
                     <div class="modern-user-avatar">
-                        <span>{{ substr(auth()->user()->name, 0, 1) }}</span>
+                        <span>{{ substr((\Illuminate\Support\Facades\Auth::guard('admin')->user()?->name ?? 'A'), 0, 1) }}</span>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="truncate text-sm font-medium text-white">{{ auth()->user()->name }}</p>
-                        <p class="text-xs truncate text-white opacity-80">{{ auth()->user()->email }}</p>
+                        <p class="truncate text-sm font-medium text-white">{{ \Illuminate\Support\Facades\Auth::guard('admin')->user()?->name ?? 'Guest' }}</p>
+                        <p class="text-xs truncate text-white opacity-80">{{ \Illuminate\Support\Facades\Auth::guard('admin')->user()?->email ?? '' }}</p>
                     </div>
                 </div>
 
@@ -160,6 +158,41 @@
         </div>
     @endif
 
+    @if(session('info'))
+        <div id="toast-info" class="modern-toast info fixed top-4 right-4 px-6 py-3 z-50 transform transition-transform duration-300">
+            <div class="flex items-center space-x-2">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zm-8-3a1 1 0 100-2 1 1 0 000 2zm1 8V9H9v6h2z" clip-rule="evenodd"/>
+                </svg>
+                <span>{{ session('info') }}</span>
+            </div>
+        </div>
+    @endif
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-confirm-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/50"></div>
+        <div class="relative z-10 max-w-md mx-auto mt-40 bg-white rounded-2xl shadow-2xl p-6">
+            <div class="flex items-start space-x-3">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:#FF6F61;color:white;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-1">Confirm Deletion</h3>
+                    <p id="delete-confirm-message" class="text-sm text-gray-600">Are you sure you want to delete this item? This action cannot be undone.</p>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button type="button" id="delete-cancel-btn" class="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200">Cancel</button>
+                <button type="button" id="delete-confirm-btn" class="px-4 py-2 rounded-lg text-white" style="background:#FF6F61;">Delete</button>
+            </div>
+            <form id="delete-hidden-form" method="POST" class="hidden">
+                @csrf
+                <input type="hidden" name="_method" value="DELETE">
+            </form>
+        </div>
+    </div>
+
     @stack('scripts')
 
     <script>
@@ -171,6 +204,58 @@
                     toast.style.transform = 'translateX(100%)';
                     setTimeout(() => toast.remove(), 300);
                 }, 5000);
+            });
+
+            // Global toast helper
+            window.showToast = function(message, type = 'success', duration = 4000) {
+                const containerId = 'toast-stack';
+                let container = document.getElementById(containerId);
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = containerId;
+                    container.className = 'fixed top-4 right-4 z-50 space-y-2';
+                    document.body.appendChild(container);
+                }
+
+                const el = document.createElement('div');
+                el.className = `modern-toast ${type} px-6 py-3 rounded-lg shadow-lg transform transition-transform duration-300`;
+
+                const wrap = document.createElement('div');
+                wrap.className = 'flex items-center space-x-2';
+                const span = document.createElement('span');
+                span.textContent = message || '';
+                wrap.appendChild(span);
+                el.appendChild(wrap);
+                container.appendChild(el);
+
+                setTimeout(() => {
+                    el.style.transform = 'translateX(100%)';
+                    setTimeout(() => el.remove(), 300);
+                }, Math.max(1000, duration || 4000));
+            };
+
+            // Delete modal wiring
+            const modal = document.getElementById('delete-confirm-modal');
+            const msgEl = document.getElementById('delete-confirm-message');
+            const cancelBtn = document.getElementById('delete-cancel-btn');
+            const confirmBtn = document.getElementById('delete-confirm-btn');
+            const form = document.getElementById('delete-hidden-form');
+
+            window.showDeleteModal = function(options) {
+                const { message, action, method } = options || {};
+                msgEl.textContent = message || 'Are you sure you want to delete this item? This action cannot be undone.';
+                form.setAttribute('action', action);
+                const methodInput = form.querySelector('input[name="_method"]');
+                methodInput.value = (method || 'DELETE').toUpperCase();
+                modal.classList.remove('hidden');
+            };
+
+            cancelBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+            confirmBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+                form.submit();
             });
         });
     </script>

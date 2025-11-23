@@ -22,9 +22,9 @@ class TagController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
         
-        // Status filter
-        if ($request->filled('status')) {
-            $query->where('is_active', $request->status);
+        // Status filter: accept '0' and '1'
+        if ($request->has('status') && $request->status !== '') {
+            $query->where('is_active', (bool) $request->status);
         }
         
         // Sort functionality
@@ -43,7 +43,7 @@ class TagController extends Controller
                 $query->orderBy('name');
         }
         
-        $tags = $query->paginate(20);
+        $tags = $query->paginate(20)->withQueryString();
         
         // Statistics
         $stats = [
@@ -86,17 +86,7 @@ class TagController extends Controller
             ->with('success', 'Tag created successfully!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Tag $tag)
-    {
-        $tag->load(['photos' => function($query) {
-            $query->where('is_active', true)->latest()->take(12);
-        }]);
-        
-        return view('admin.tags.show', compact('tag'));
-    }
+    
 
     /**
      * Show the form for editing the specified resource.

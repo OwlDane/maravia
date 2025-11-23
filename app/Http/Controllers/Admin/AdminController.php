@@ -18,11 +18,7 @@ class AdminController extends Controller
 {
     public function showLogin()
     {
-        // If user is already authenticated, redirect to admin dashboard
-        if (auth()->check()) {
-            return redirect()->route('admin.dashboard');
-        }
-        
+        // Selalu tampilkan halaman login admin (agar tidak auto-redirect)
         return view('admin.login');
     }
 
@@ -33,9 +29,9 @@ class AdminController extends Controller
             'password' => 'required',
         ]);
 
-        if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+        if (Auth::guard('admin')->attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             $request->session()->regenerate();
-            return redirect()->intended(route('admin.dashboard'));
+            return redirect()->route('admin.dashboard');
         }
 
         throw ValidationException::withMessages([
@@ -45,11 +41,15 @@ class AdminController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
+        // Logout from admin guard and fallback web guard to be safe
+        Auth::guard('admin')->logout();
+        if (Auth::check()) {
+            Auth::logout();
+        }
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         
-        return redirect()->route('home');
+        return redirect()->route('admin.login');
     }
 
     public function dashboard()
@@ -61,7 +61,7 @@ class AdminController extends Controller
                                        ->whereYear('created_at', now()->year)
                                        ->count(),
             'total_categories' => Category::active()->count(),
-            'total_views' => PhotoView::count(),
+            'total_views' => Photo::sum('view_count'),
             'views_today' => PhotoView::whereDate('viewed_at', today())->count(),
             'total_testimonials' => Testimonial::count(),
             'pending_testimonials' => Testimonial::pending()->count(),
@@ -140,6 +140,35 @@ class AdminController extends Controller
                 'icon' => 'fa-comment',
                 'color' => 'yellow',
                 'created_at' => $testimonial->created_at,
+            ];
+        }
+
+        // Merge Admin/User activities log
+        $logItems = \App\Models\UserActivity::with('user')
+            ->latest()
+            ->limit(10)
+            ->get();
+
+        foreach ($logItems as $log) {
+            $title = match ($log->activity_type) {
+                'article_created' => 'Artikel dibuat: ' . ($log->metadata['title'] ?? ''),
+                'article_updated' => 'Artikel diperbarui: ' . ($log->metadata['title'] ?? ''),
+                'article_deleted' => 'Artikel dihapus: ' . ($log->metadata['title'] ?? ''),
+                'photo_uploaded' => 'Foto diunggah: ' . ($log->metadata['title'] ?? ''),
+                'photo_deleted' => 'Foto dihapus: ' . ($log->metadata['title'] ?? ''),
+                'photo_featured' => 'Foto dijadikan featured: ' . ($log->metadata['title'] ?? ''),
+                'photo_unfeatured' => 'Foto dihapus dari featured: ' . ($log->metadata['title'] ?? ''),
+                'photo_activated' => 'Foto diaktifkan: ' . ($log->metadata['title'] ?? ''),
+                'photo_deactivated' => 'Foto dinonaktifkan: ' . ($log->metadata['title'] ?? ''),
+                default => ucfirst(str_replace('_',' ', $log->activity_type))
+            };
+
+            $activities[] = [
+                'title' => ($log->user?->name ? $log->user->name . ' • ' : '') . $title,
+                'time' => $log->created_at->diffForHumans(),
+                'icon' => $log->activity_icon,
+                'color' => $log->activity_color,
+                'created_at' => $log->created_at,
             ];
         }
 

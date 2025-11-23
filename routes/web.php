@@ -6,12 +6,10 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\PhotoController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\TagController;
-use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\StatisticsController;
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\TestimonialController as GuestTestimonialController;
-use App\Http\Controllers\PageController as GuestPageController;
 use App\Http\Controllers\Admin\PhotoCommentController;
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\Auth\LoginController;
@@ -28,13 +26,17 @@ Route::get('/gallery/tag/{tag}', [GalleryController::class, 'tag'])->name('galle
 Route::get('/search', [GalleryController::class, 'search'])->name('gallery.search');
 Route::post('/gallery/photo/{photo}/view', [GalleryController::class, 'trackView'])->name('gallery.track-view');
 
+// Public News routes
+Route::get('/news', [GalleryController::class, 'news'])->name('news.index');
+Route::get('/news/{slug}', [GalleryController::class, 'newsShow'])->name('news.show');
+
 // Download routes
 Route::get('/download/photo/{photo}', [DownloadController::class, 'downloadPhoto'])->name('download.photo');
 Route::post('/download/bulk', [DownloadController::class, 'bulkDownload'])->name('download.bulk');
 
 // Comment routes
 Route::get('/gallery/photo/{photo}/comments', [CommentController::class, 'getComments'])->name('gallery.photo.comments');
-Route::post('/gallery/photo/{photo}/comments', [CommentController::class, 'store'])->name('gallery.photo.comment.store');
+Route::post('/gallery/photo/{photo}/comments', [CommentController::class, 'store'])->middleware('auth')->name('gallery.photo.comment.store');
 Route::post('/comments/{comment}/react', [CommentController::class, 'toggleReaction'])->middleware('auth')->name('comments.react');
 Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->middleware('auth')->name('comments.destroy');
 
@@ -46,8 +48,7 @@ Route::post('/download/bulk', [DownloadController::class, 'bulkDownload'])->name
 Route::get('/testimonials', [GuestTestimonialController::class, 'index'])->name('testimonials');
 Route::post('/testimonials', [GuestTestimonialController::class, 'store'])->name('testimonials.store');
 
-// Dynamic Pages
-Route::get('/page/{page}', [GuestPageController::class, 'show'])->name('page.show');
+
 
 // Authentication Routes
 Route::get('/admin/login', [AdminController::class, 'showLogin'])->name('admin.login');
@@ -57,6 +58,22 @@ Route::post('/admin/login', [AdminController::class, 'login'])->name('admin.logi
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+// Safe GET fallback for users who open /logout directly: auto-submit POST with CSRF
+Route::get('/logout', function () {
+    if (!auth()->check()) {
+        return redirect('/');
+    }
+    $action = route('logout');
+    $token = csrf_token();
+    return response("<form id='f' method='POST' action='{$action}'>
+        <input type='hidden' name='_token' value='{$token}' />
+    </form>
+    <script>document.getElementById('f').submit();</script>
+    <noscript>
+      <p>Click the button to logout:</p>
+      <button type='submit' form='f'>Logout</button>
+    </noscript>", 200)->header('Content-Type', 'text/html');
+})->name('logout.get');
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
 
@@ -204,6 +221,22 @@ Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function ()
         return redirect()->route('admin.dashboard');
     });
     Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
+    // Safe GET fallback for admins who open /admin/logout directly
+    Route::get('/logout', function () {
+        if (!\Illuminate\Support\Facades\Auth::guard('admin')->check()) {
+            return redirect()->route('admin.login');
+        }
+        $action = route('admin.logout');
+        $token = csrf_token();
+        return response("<form id='f' method='POST' action='{$action}'>
+            <input type='hidden' name='_token' value='{$token}' />
+        </form>
+        <script>document.getElementById('f').submit();</script>
+        <noscript>
+          <p>Click the button to logout:</p>
+          <button type='submit' form='f'>Logout</button>
+        </noscript>", 200)->header('Content-Type', 'text/html');
+    })->name('admin.logout.get');
     
     // Photos
     Route::resource('photos', PhotoController::class);
@@ -212,11 +245,9 @@ Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function ()
     Route::post('/photos/{photo}/toggle-active', [PhotoController::class, 'toggleActive'])->name('photos.toggle-active');
     Route::post('/photos/bulk-action', [PhotoController::class, 'bulkAction'])->name('photos.bulk-action');
 
-    // Videos
-    Route::resource('videos', \App\Http\Controllers\Admin\VideoController::class);
-    
     // Articles
     Route::resource('articles', \App\Http\Controllers\Admin\ArticleController::class);
+
     
     // Categories
     Route::resource('categories', CategoryController::class);
@@ -225,15 +256,14 @@ Route::prefix('admin')->name('admin.')->middleware(['admin'])->group(function ()
     Route::post('/categories/bulk-action', [CategoryController::class, 'bulkAction'])->name('categories.bulk-action');
     
     // Tags
-    Route::resource('tags', TagController::class);
+    Route::resource('tags', TagController::class)->except(['show']);
     Route::post('/tags/{tag}/toggle-active', [TagController::class, 'toggleActive'])->name('tags.toggle-active');
     Route::post('/tags/bulk-action', [TagController::class, 'bulkAction'])->name('tags.bulk-action');
     
-    // Pages
-    Route::resource('pages', PageController::class);
+    // Pages module removed
     
     // Testimonials
-    Route::resource('testimonials', TestimonialController::class)->only(['index', 'show', 'destroy']);
+    Route::resource('testimonials', TestimonialController::class)->only(['index', 'destroy']);
     Route::post('/testimonials/{testimonial}/approve', [TestimonialController::class, 'approve'])->name('testimonials.approve');
     Route::post('/testimonials/{testimonial}/reject', [TestimonialController::class, 'reject'])->name('testimonials.reject');
     Route::post('/testimonials/bulk-action', [TestimonialController::class, 'bulkAction'])->name('testimonials.bulk-action');

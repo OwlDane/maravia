@@ -6,6 +6,7 @@ use App\Models\Photo;
 use App\Models\Category;
 use App\Models\Tag;
 use App\Models\PhotoView;
+use App\Models\Article;
 use Illuminate\Http\Request;
 
 class GalleryController extends Controller
@@ -23,20 +24,8 @@ class GalleryController extends Controller
             'total_views' => Photo::sum('view_count'),
         ];
         
-        // Load recent videos and articles
-        $recentVideos = collect();
+        // Load recent articles only (video feature removed)
         $recentArticles = collect();
-        
-        try {
-            if (class_exists('App\Models\Video')) {
-                $recentVideos = \App\Models\Video::active()->featured()->latest()->limit(6)->get();
-                if ($recentVideos->isEmpty()) {
-                    $recentVideos = \App\Models\Video::active()->latest()->limit(6)->get();
-                }
-            }
-        } catch (\Exception $e) {
-            $recentVideos = collect();
-        }
         
         try {
             if (class_exists('App\Models\Article')) {
@@ -44,17 +33,26 @@ class GalleryController extends Controller
                 if ($recentArticles->isEmpty()) {
                     $recentArticles = \App\Models\Article::where('is_published', true)->latest()->limit(3)->get();
                 }
+
             }
         } catch (\Exception $e) {
             $recentArticles = collect();
         }
 
-        return view('gallery.index', compact('featuredPhotos', 'categories', 'recentPhotos', 'stats', 'recentVideos', 'recentArticles'));
+        return view('gallery.index', compact('featuredPhotos', 'categories', 'recentPhotos', 'stats', 'recentArticles'));
     }
 
     public function gallery(Request $request)
     {
         $query = Photo::active()->with(['category', 'tags']);
+
+        // If logged in, include per-photo favorited flag
+        if (auth()->check()) {
+            $userId = auth()->id();
+            $query->withCount(['favoritedBy as is_favorited' => function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            }]);
+        }
         
         // Filter by category
         if ($request->has('category') && $request->category) {
@@ -130,14 +128,44 @@ class GalleryController extends Controller
         
         $photo->load(['category', 'tags', 'uploader']);
         
-        // Get related photos from same category
-        $relatedPhotos = Photo::active()
-            ->where('category_id', $photo->category_id)
-            ->where('id', '!=', $photo->id)
-            ->with(['category', 'tags'])
-            ->latest()
-            ->take(6)
-            ->get();
+        // Related by shared tags first
+        $tagIds = $photo->tags ? $photo->tags->pluck('id')->all() : [];
+        $relatedPhotos = collect();
+        if (!empty($tagIds)) {
+            $relatedPhotos = Photo::active()
+                ->where('id', '!=', $photo->id)
+                ->whereHas('tags', function($q) use ($tagIds) {
+                    $q->whereIn('tags.id', $tagIds);
+                })
+                ->with(['category', 'tags'])
+                ->latest()
+                ->distinct()
+                ->take(6)
+                ->get();
+        }
+
+        // Fallback to same category if no tag matches
+        if ($relatedPhotos->isEmpty()) {
+            $relatedPhotos = Photo::active()
+                ->when($photo->category_id, function($q) use ($photo) {
+                    $q->where('category_id', $photo->category_id);
+                })
+                ->where('id', '!=', $photo->id)
+                ->with(['category', 'tags'])
+                ->latest()
+                ->take(6)
+                ->get();
+        }
+
+        // Fallback to latest if still empty
+        if ($relatedPhotos->isEmpty()) {
+            $relatedPhotos = Photo::active()
+                ->where('id', '!=', $photo->id)
+                ->with(['category', 'tags'])
+                ->latest()
+                ->take(6)
+                ->get();
+        }
         
         return view('gallery.show', compact('photo', 'relatedPhotos'));
     }
@@ -317,5 +345,31 @@ class GalleryController extends Controller
 
         // Fallback to original image
         return $this->serveImage($photo);
+    }
+
+    // Public News Listing
+    public function news(Request $request)
+    {
+        $q = Article::published()->latest();
+        if ($s = $request->get('q')) {
+            $q->where(function($qq) use ($s){
+                $qq->where('title','like',"%$s%")
+                   ->orWhere('excerpt','like',"%$s%")
+                   ->orWhere('content','like',"%$s%");
+            });
+        }
+        $articles = $q->paginate(9)->withQueryString();
+        return view('news.index', compact('articles'));
+    }
+
+    // Public News Detail
+    public function newsShow($slug)
+    {
+        $article = Article::where('slug', $slug)->first();
+        if (!$article && is_numeric($slug)) {
+            $article = Article::find($slug);
+        }
+        abort_unless($article && $article->is_published, 404);
+        return view('news.show', compact('article'));
     }
 }

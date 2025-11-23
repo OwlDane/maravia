@@ -27,9 +27,16 @@ class CategoryController extends Controller
             });
         }
 
-        // Filter by status
+        // Filter by status (accept '0'/'1' and words)
         if ($request->has('status') && $request->status !== '') {
-            $query->where('is_active', $request->status);
+            $status = strtolower((string) $request->status);
+            $map = [
+                '1' => true, 'true' => true, 'active' => true, 'yes' => true,
+                '0' => false, 'false' => false, 'inactive' => false, 'no' => false,
+            ];
+            if (array_key_exists($status, $map)) {
+                $query->where('is_active', $map[$status]);
+            }
         }
 
         // Sort options

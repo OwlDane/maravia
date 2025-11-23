@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Models\Category;
 use App\Models\Tag;
 use App\Models\Photo;
-use App\Models\Page;
 use App\Models\Testimonial;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -29,7 +28,6 @@ class DatabaseSeeder extends Seeder
 
         // Run other seeders
         $this->call([
-            PageSeeder::class,
             UserEngagementSeeder::class,
         ]);
 

@@ -17,85 +17,10 @@
     
     <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'sans': ['Inter', 'system-ui', 'sans-serif'],
-                        'display': ['Space Grotesk', 'system-ui', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: {
-                            50: '#fff5f5',
-                            100: '#ffe4e6',
-                            200: '#fecdd3',
-                            300: '#fda4af',
-                            400: '#fb7185',
-                            500: '#F62731',
-                            600: '#EE5158',
-                            700: '#d41f28',
-                            800: '#be1e2d',
-                            900: '#881923',
-                        },
-                        school: {
-                            50: '#f0fdfa',
-                            100: '#ccfbf1',
-                            200: '#99f6e4',
-                            300: '#5eead4',
-                            400: '#2dd4bf',
-                            500: '#8FBAB1',
-                            600: '#7aa59d',
-                            700: '#0f766e',
-                            800: '#115e59',
-                            900: '#134e4a',
-                        },
-                        coral: {
-                            400: '#ff7f7f',
-                            500: '#F62731',
-                            600: '#EE5158',
-                        },
-                        yellow: {
-                            500: '#FBE449',
-                            600: '#e8d136',
-                        },
-                        taupe: {
-                            500: '#BCB3AA',
-                            600: '#a89f96',
-                        }
-                    },
-                    animation: {
-                        'float': 'float 6s ease-in-out infinite',
-                        'glow': 'glow 2s ease-in-out infinite alternate',
-                        'slide-up': 'slideUp 0.5s ease-out',
-                        'fade-in': 'fadeIn 0.6s ease-out',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0px)' },
-                            '50%': { transform: 'translateY(-10px)' },
-                        },
-                        glow: {
-                            '0%': { boxShadow: '0 0 5px rgba(246, 39, 49, 0.5)' },
-                            '100%': { boxShadow: '0 0 20px rgba(246, 39, 49, 0.8)' },
-                        },
-                        slideUp: {
-                            '0%': { transform: 'translateY(20px)', opacity: '0' },
-                            '100%': { transform: 'translateY(0)', opacity: '1' },
-                        },
-                        fadeIn: {
-                            '0%': { opacity: '0' },
-                            '100%': { opacity: '1' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    
+
+    <!-- Vite (Tailwind + JS) -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <!-- Theme CSS -->
     <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
     
@@ -127,19 +52,19 @@
                 
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="#home" class="text-gray-700 hover:text-coral-500 font-medium transition-colors smooth-scroll">
+                    <a href="{{ route('home') }}" class="text-gray-700 hover:text-coral-500 font-medium transition-colors">
                         <i class="fas fa-home mr-2"></i>Beranda
                     </a>
-                    <a href="#categories" class="text-gray-700 hover:text-coral-500 font-medium transition-colors smooth-scroll">
+                    <a href="{{ route('home') }}#categories" class="text-gray-700 hover:text-coral-500 font-medium transition-colors">
                         <i class="fas fa-th-large mr-2"></i>Kategori
                     </a>
-                    <a href="#recent" class="text-gray-700 hover:text-coral-500 font-medium transition-colors smooth-scroll">
+                    <a href="{{ route('home') }}#recent" class="text-gray-700 hover:text-coral-500 font-medium transition-colors">
                         <i class="fas fa-clock mr-2"></i>Terbaru
                     </a>
-                    <a href="#news" class="text-gray-700 hover:text-coral-500 font-medium transition-colors smooth-scroll">
+                    <a href="{{ route('home') }}#news" class="text-gray-700 hover:text-coral-500 font-medium transition-colors">
                         <i class="fas fa-newspaper mr-2"></i>Berita
                     </a>
-                    <a href="#contact" class="text-gray-700 hover:text-coral-500 font-medium transition-colors smooth-scroll">
+                    <a href="{{ route('home') }}#contact" class="text-gray-700 hover:text-coral-500 font-medium transition-colors">
                         <i class="fas fa-envelope mr-2"></i>Kontak
                     </a>
                     
@@ -182,19 +107,19 @@
         <!-- Mobile Menu -->
         <div class="mobile-menu hidden md:hidden bg-white/90 backdrop-blur-md border-t border-gray-200">
             <div class="px-4 py-3 space-y-3">
-                <a href="#home" class="block text-gray-700 hover:text-coral-500 font-medium smooth-scroll">
+                <a href="{{ route('home') }}" class="block text-gray-700 hover:text-coral-500 font-medium">
                     <i class="fas fa-home mr-2"></i>Beranda
                 </a>
-                <a href="#categories" class="block text-gray-700 hover:text-coral-500 font-medium smooth-scroll">
+                <a href="{{ route('home') }}#categories" class="block text-gray-700 hover:text-coral-500 font-medium">
                     <i class="fas fa-th-large mr-2"></i>Kategori
                 </a>
-                <a href="#recent" class="block text-gray-700 hover:text-coral-500 font-medium smooth-scroll">
+                <a href="{{ route('home') }}#recent" class="block text-gray-700 hover:text-coral-500 font-medium">
                     <i class="fas fa-clock mr-2"></i>Terbaru
                 </a>
-                <a href="#news" class="block text-gray-700 hover:text-coral-500 font-medium smooth-scroll">
+                <a href="{{ route('home') }}#news" class="block text-gray-700 hover:text-coral-500 font-medium">
                     <i class="fas fa-newspaper mr-2"></i>Berita
                 </a>
-                <a href="#contact" class="block text-gray-700 hover:text-coral-500 font-medium smooth-scroll">
+                <a href="{{ route('home') }}#contact" class="block text-gray-700 hover:text-coral-500 font-medium">
                     <i class="fas fa-envelope mr-2"></i>Kontak
                 </a>
             </div>
@@ -251,22 +176,22 @@
                         <li><a href="{{ route('home') }}" class="text-white/80 hover:text-white transition-colors flex items-center"><i class="fas fa-home mr-2"></i>Beranda</a></li>
                         <li><a href="{{ route('gallery') }}" class="text-white/80 hover:text-white transition-colors flex items-center"><i class="fas fa-images mr-2"></i>Galeri</a></li>
                         <li><a href="{{ route('testimonials') }}" class="text-white/80 hover:text-white transition-colors flex items-center"><i class="fas fa-comments mr-2"></i>Testimoni</a></li>
-                        <li><a href="{{ route('admin.login') }}" class="text-white/80 hover:text-white transition-colors flex items-center"><i class="fas fa-lock mr-2"></i>Admin</a></li>
+                        
                     </ul>
                 </div>
                 
                 <div>
                     <h4 class="font-semibold text-lg mb-4">Kontak</h4>
                     <ul class="space-y-2 text-white/80">
-                        <li class="flex items-start"><i class="fas fa-map-marker-alt mr-2 mt-1"></i><span>Jl. Contoh No. 123, Jakarta</span></li>
-                        <li class="flex items-center"><i class="fas fa-phone mr-2"></i>(021) 1234-5678</li>
-                        <li class="flex items-center"><i class="fas fa-envelope mr-2"></i>info@maravia.com</li>
+                        <li class="flex items-start"><i class="fas fa-map-marker-alt mr-2 mt-1"></i><span>Jl. Kapten Yusuf No.66</span></li>
+                        <li class="flex items-center"><i class="fas fa-phone mr-2"></i>+52 8588 6966 548</li>
+                        <li class="flex items-center"><i class="fas fa-envelope mr-2"></i>maraviakali@gmail.com</li>
                     </ul>
                 </div>
             </div>
             
             <div class="border-t border-white/20 mt-8 pt-8 text-center text-white/80">
-                <p>&copy; {{ date('Y') }} Maravia Gallery. Made with <span class="text-red-300">❤️</span> for everyone.</p>
+                <p>&copy; {{ date('Y') }} Maravia.</p>
             </div>
         </div>
     </footer>

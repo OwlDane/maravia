@@ -89,7 +89,7 @@ class PageSeeder extends Seeder
                     <div class="col-md-6">
                         <h3>Contact Information</h3>
                         <p><strong>Phone:</strong> +62 123 456 7890</p>
-                        <p><strong>Email:</strong> info@gagaleri.com</p>
+                        <p><strong>Email:</strong> info@maravia.com</p>
                         <p><strong>Address:</strong> Jl. Photography No. 123, Jakarta, Indonesia</p>
                         
                         <h3>Business Hours</h3>
@@ -101,9 +101,9 @@ class PageSeeder extends Seeder
                         <h3>Follow Us</h3>
                         <p>Stay connected with us on social media for the latest updates and behind-the-scenes content:</p>
                         <ul>
-                            <li>Instagram: @gagaleri</li>
-                            <li>Facebook: GaGaleri Photography</li>
-                            <li>Twitter: @gagaleri</li>
+                            <li>Instagram: @maravia</li>
+                            <li>Facebook: Maravia</li>
+                            <li>Twitter: @maravia</li>
                         </ul>
                         
                         <h3>Quick Response</h3>
@@ -114,7 +114,7 @@ class PageSeeder extends Seeder
                 <h3>Book a Consultation</h3>
                 <p>Ready to discuss your photography needs? We offer free consultations to understand your vision and provide personalized recommendations. Contact us today to schedule your consultation!</p>',
                 'meta_title' => 'Contact Us - Professional Photography Services',
-                'meta_description' => 'Contact us for professional photography services. Phone: +62 123 456 7890, Email: info@gagaleri.com. Free consultations available.',
+                'meta_description' => 'Contact us for professional photography services. Phone: +62 123 456 7890, Email: info@maravia.com. Free consultations available.',
                 'is_published' => true,
                 'show_in_menu' => true,
                 'menu_order' => 3,
@@ -151,8 +151,8 @@ class PageSeeder extends Seeder
                 <p>By booking our photography services, you grant us permission to use selected photos for portfolio and marketing purposes, unless otherwise specified in your contract.</p>
                 
                 <h3>Contact Us</h3>
-                <p>If you have any questions about this Privacy Policy, please contact us at info@gagaleri.com.</p>',
-                'meta_title' => 'Privacy Policy - GaGaleri Photography',
+                <p>If you have any questions about this Privacy Policy, please contact us at info@maravia.com.</p>',
+                'meta_title' => 'Privacy Policy - Maravia',
                 'meta_description' => 'Our privacy policy explains how we collect, use, and protect your personal information when using our photography services.',
                 'is_published' => true,
                 'show_in_menu' => false,

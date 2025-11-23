@@ -31,19 +31,36 @@ class PhotoController extends Controller
             });
         }
 
-        // Filter by category
-        if ($request->has('category') && $request->category) {
-            $query->where('category_id', $request->category);
+        // Filter by category (numeric id only)
+        $category = $request->get('category');
+        if (is_numeric($category) && (int)$category > 0) {
+            $query->where('category_id', (int)$category);
         }
 
-        // Filter by status
-        if ($request->has('status') && $request->status !== '') {
-            $query->where('is_active', $request->status);
+        // Filter by status (map strings to boolean)
+        $status = $request->get('status');
+        if ($status !== null && $status !== '' && strtolower((string)$status) !== 'all') {
+            $statusMap = [
+                '1' => true, 'true' => true, 'active' => true, 'yes' => true,
+                '0' => false, 'false' => false, 'inactive' => false, 'no' => false,
+            ];
+            $key = strtolower((string)$status);
+            if (array_key_exists($key, $statusMap)) {
+                $query->where('is_active', $statusMap[$key]);
+            }
         }
 
-        // Filter by featured
-        if ($request->has('featured') && $request->featured !== '') {
-            $query->where('is_featured', $request->featured);
+        // Filter by featured (map strings to boolean)
+        $featured = $request->get('featured');
+        if ($featured !== null && $featured !== '' && strtolower((string)$featured) !== 'all') {
+            $featMap = [
+                '1' => true, 'true' => true, 'featured' => true, 'yes' => true,
+                '0' => false, 'false' => false, 'nonfeatured' => false, 'no' => false,
+            ];
+            $key = strtolower((string)$featured);
+            if (array_key_exists($key, $featMap)) {
+                $query->where('is_featured', $featMap[$key]);
+            }
         }
 
         // Sort options

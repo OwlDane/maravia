@@ -51,22 +51,22 @@ class LoginController extends Controller
     {
         $this->validateLogin($request);
 
-        // Simple demo login - anyone can login with any email/password
-        $demoUser = $this->createOrGetDemoUser($request->email);
+        $credentials = $request->only('email', 'password');
 
-        // Log the user in with demo credentials
-        Auth::login($demoUser);
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
+            $user = Auth::user();
+            // Optional: record login activity and update last_login
+            if ($user) {
+                $user->update(['last_login' => now()]);
+                if (method_exists($user, 'recordActivity')) {
+                    $user->recordActivity('login');
+                }
+            }
+            return redirect()->intended($this->redirectTo);
+        }
 
-        // Update last login
-        $demoUser->update(['last_login' => now()]);
-
-        // Check for login achievements
-        $this->checkLoginAchievements($demoUser);
-
-        // Record login activity
-        $demoUser->recordActivity('login');
-
-        return $this->sendLoginResponse($request);
+        return $this->sendFailedLoginResponse($request);
     }
 
     /**
@@ -119,8 +119,10 @@ class LoginController extends Controller
     protected function validateLogin(Request $request)
     {
         $request->validate([
-            'email' => 'required|string|email',
+            'email' => 'required|string|email|exists:users,email',
             'password' => 'required|string',
+        ], [
+            'email.exists' => 'Email tidak terdaftar. Silakan daftar terlebih dahulu.',
         ]);
     }
 

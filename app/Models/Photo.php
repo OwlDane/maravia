@@ -74,6 +74,11 @@ class Photo extends Model
         return $this->hasMany(PhotoRating::class);
     }
 
+    public function comments(): HasMany
+    {
+        return $this->hasMany(PhotoComment::class, 'photo_id');
+    }
+
     public function collections(): BelongsToMany
     {
         return $this->belongsToMany(UserCollection::class, 'collection_photos', 'photo_id', 'collection_id')

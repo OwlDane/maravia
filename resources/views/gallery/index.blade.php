@@ -95,7 +95,7 @@
                                                                     <i class="fas fa-heart mr-2 text-red-300"></i>{{ $photo->favorites_count ?? 0 }}
                                                                 </span>
                                                                 <span class="glass-card flex items-center text-sm bg-white/15 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 hover:scale-105 transition-transform">
-                                                                    <i class="fas fa-tag mr-2 text-green-300"></i>{{ $photo->category->name ?? 'Umum' }}
+                                                                    <i class="fas fa-tag mr-2 text-green-300"></i>{{ $photo->category?->name ?? 'Umum' }}
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -138,8 +138,8 @@
                                                  data-translate-x="{{ $translateX }}"
                                                  data-rotate-y="{{ $rotateY }}"
                                                  style="width: 100%; height: 100%; transform: translateY(-{{ $translateY }}px) translateX({{ $translateX }}px) scale({{ $baseScale }}) rotateY({{ $rotateY }}deg); opacity: {{ $opacity }}; z-index: {{ $zIndex }}; transform-origin: center center;"
-                                                 data-photo-id="{{ $photo->id }}" data-photo-url="{{ $photo->url }}" data-photo-title="{{ addslashes($photo->title) }}" data-photo-category="{{ $photo->category->name ?? 'Umum' }}" data-photo-views="{{ $photo->view_count ?? 0 }}" data-photo-date="{{ $photo->created_at->format('d M Y') }}" data-photo-description="{{ addslashes($photo->description ?? 'Tidak ada deskripsi') }}"
-                                                 onclick="openPhotoModal({ id: {{ $photo->id }}, url: '{{ $photo->url }}', title: '{{ addslashes($photo->title) }}', category: '{{ $photo->category->name ?? 'Umum' }}', views: '{{ $photo->view_count ?? 0 }}', date: '{{ $photo->created_at->format('d M Y') }}', description: '{{ addslashes($photo->description ?? 'Tidak ada deskripsi') }}' })">
+                                                 data-photo-id="{{ $photo->id }}" data-photo-url="{{ $photo->url }}" data-photo-title="{{ addslashes($photo->title) }}" data-photo-category="{{ $photo->category?->name ?? 'Umum' }}" data-photo-views="{{ $photo->view_count ?? 0 }}" data-photo-date="{{ $photo->created_at->format('d M Y') }}" data-photo-description="{{ addslashes($photo->description ?? 'Tidak ada deskripsi') }}" data-photo-href="{{ route('gallery.photo', $photo) }}"
+                                                 >
                                                 <img src="{{ $photo->url }}" alt="{{ $photo->title }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 rounded-3xl">
                                                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl">
                                                     <div class="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">
@@ -223,6 +223,12 @@
                    class="inline-flex items-center px-8 py-4 bg-gray-900 hover:bg-gray-800 text-white rounded-xl font-semibold transition-all duration-300 hover-lift smooth-scroll">
                     Lihat Foto Terbaru
                     <i class="fas fa-arrow-down ml-3"></i>
+                </a>
+            </div>
+            <!-- CTA: All News -->
+            <div class="mt-10 flex justify-center">
+                <a href="{{ route('news.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-white/80 hover:bg-white text-gray-800 rounded-xl shadow border border-white/30 transition">
+                    Lihat Semua Berita <i class="fas fa-newspaper"></i>
                 </a>
             </div>
         </div>
@@ -331,15 +337,13 @@
                         <div class="swiper-slide">
                             <div class="group relative">
                                 <a href="javascript:void(0)"
-                                   data-photo-id="{{ $photo->id }}" data-photo-url="{{ $photo->url }}" data-photo-title="{{ addslashes($photo->title) }}" data-photo-category="{{ $photo->category->name ?? 'Umum' }}" data-photo-views="{{ $photo->view_count ?? 0 }}" data-photo-date="{{ $photo->created_at->format('d M Y') }}" data-photo-description="{{ addslashes($photo->description ?? 'Tidak ada deskripsi') }}"
-                                   onclick="openPhotoModal({ id: {{ $photo->id }}, url: '{{ $photo->url }}', title: '{{ addslashes($photo->title) }}', category: '{{ $photo->category->name ?? 'Umum' }}', views: '{{ $photo->view_count ?? 0 }}', date: '{{ $photo->created_at->format('d M Y') }}', description: '{{ addslashes($photo->description ?? 'Tidak ada deskripsi') }}' })"
-                                   class="recent-card block cursor-pointer photo-item">
+                                   data-photo-id="{{ $photo->id }}" data-photo-url="{{ $photo->url }}" data-photo-title="{{ addslashes($photo->title) }}" data-photo-category="{{ $photo->category?->name ?? 'Umum' }}" data-photo-views="{{ $photo->view_count ?? 0 }}" data-photo-date="{{ $photo->created_at->format('d M Y') }}" data-photo-description="{{ addslashes($photo->description ?? 'Tidak ada deskripsi') }}"
+                                   class="recent-card block cursor-default">
                                     <div class="media relative aspect-square rounded-2xl overflow-hidden">
                                         <img src="{{ $photo->url }}" alt="{{ $photo->title }}" class="w-full h-full object-cover">
                                         <!-- top pills -->
-                                        <div class="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-                                            <span class="pill-brand text-[11px] font-semibold">{{ $photo->category->name ?? 'Umum' }}</span>
-                                            <span class="pill-brand-icon"><i class="fas fa-ellipsis-h text-[12px]"></i></span>
+                                        <div class="absolute top-3 left-3 right-3 flex items-center justify-between">
+                                            <span class="pill-brand text-[11px] font-semibold pointer-events-none">{{ $photo->category?->name ?? 'Umum' }}</span>
                                         </div>
                                         <!-- bottom info -->
                                         <div class="absolute bottom-3 left-3 right-3 flex items-end justify-between pointer-events-none">
@@ -359,6 +363,12 @@
                         @endforeach
                     </div>
                 </div>
+                <!-- CTA: All Photos -->
+                <div class="mt-8 flex justify-center">
+                    <a href="{{ route('gallery') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-white/80 hover:bg-white text-gray-800 rounded-xl shadow border border-white/30 transition">
+                        Lihat Semua Foto <i class="fas fa-images"></i>
+                    </a>
+                </div>
                 <!-- arrows -->
                 <button class="recent-prev glass-card hidden md:flex items-center justify-center absolute -left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/70 border border-white/60 shadow"><i class="fas fa-chevron-left text-gray-800"></i></button>
                 <button class="recent-next glass-card hidden md:flex items-center justify-center absolute -right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/70 border border-white/60 shadow"><i class="fas fa-chevron-right text-gray-800"></i></button>
@@ -371,35 +381,39 @@
     @if(isset($recentArticles) && $recentArticles->count() > 0)
     <section id="news" class="py-20 scroll-mt-20 relative z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-5xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent mb-4">Berita</h2>
-                <p class="text-xl text-gray-600">Kabar terbaru dan informasi penting</p>
+            <div class="mb-12 flex items-end justify-between gap-4 flex-wrap">
+                <div class="text-center md:text-left">
+                    <h2 class="text-5xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent mb-2">Berita</h2>
+                    <p class="text-xl text-gray-600">Kabar terbaru dan informasi penting</p>
+                </div>
+                <a href="{{ route('news.index') }}" class="inline-flex items-center gap-2 px-5 py-3 bg-white/80 hover:bg-white text-gray-800 rounded-xl shadow border border-white/30 transition">
+                    Lihat Semua Berita <i class="fas fa-arrow-right"></i>
+                </a>
             </div>
             <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 @foreach($recentArticles->take(6) as $article)
-                <article class="group rounded-2xl overflow-hidden border border-white/20 bg-white/70 backdrop-blur-xl hover-lift shadow-xl">
-                    <a href="javascript:void(0)" class="block">
-                        <div class="aspect-video bg-gray-100 overflow-hidden">
-                            @php
-                                $cover = $article->cover_image ?? $article->thumbnail ?? $article->image_path ?? null;
-                            @endphp
-                            @if($cover)
-                                <img src="{{ Str::startsWith($cover, ['http://','https://']) ? $cover : asset('storage/'.$cover) }}" alt="{{ $article->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                            @else
-                                <div class="w-full h-full flex items-center justify-center text-gray-400">
-                                    <i class="fas fa-newspaper text-4xl"></i>
-                                </div>
-                            @endif
+                <article class="group rounded-2xl overflow-hidden border border-white/20 bg-white/80 backdrop-blur-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+                    <div class="block p-5">
+                        <div class="flex items-center justify-between text-xs text-gray-600 mb-3">
+                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 border text-gray-700"><i class="fas fa-folder"></i> {{ $article->category?->name ?? 'Umum' }}</span>
+                            <span class="inline-flex items-center gap-1 text-gray-500"><i class="fas fa-clock"></i> {{ $article->created_at?->diffForHumans() }}</span>
                         </div>
-                        <div class="p-5">
-                            <div class="flex items-center justify-between text-xs text-gray-600 mb-2">
-                                <span class="inline-flex items-center gap-1"><i class="fas fa-folder"></i> {{ $article->category->name ?? 'Umum' }}</span>
-                                <span class="inline-flex items-center gap-1"><i class="fas fa-clock"></i> {{ $article->created_at?->diffForHumans() }}</span>
-                            </div>
-                            <h3 class="font-bold text-lg text-gray-900 mb-2 line-clamp-2">{{ $article->title }}</h3>
-                            <p class="text-gray-700 line-clamp-3">{{ \Illuminate\Support\Str::limit($article->excerpt ?? $article->summary ?? $article->content ?? '', 140) }}</p>
+                        <h3 class="font-bold text-lg text-gray-900 mb-2">{{ $article->title }}</h3>
+                        @if($article->excerpt)
+                            <p class="text-gray-700 line-clamp-3 mb-3">{{ $article->excerpt }}</p>
+                        @endif
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-500">Ringkasan</span>
+                            <button type="button" class="inline-flex items-center gap-2 text-coral-600 font-semibold hover:underline open-news"
+                                    data-title="{{ addslashes($article->title) }}"
+                                    data-category="{{ $article->category?->name ?? 'Umum' }}"
+                                    data-date="{{ $article->created_at?->diffForHumans() }}"
+                                    data-excerpt="{{ addslashes($article->excerpt ?? '') }}"
+                                    data-content="{{ addslashes($article->content ?? '') }}">
+                                Baca selengkapnya <i class="fas fa-arrow-right"></i>
+                            </button>
                         </div>
-                    </a>
+                    </div>
                 </article>
                 @endforeach
             </div>
@@ -407,55 +421,7 @@
     </section>
     @endif
 
-    {{-- Video Terbaru (opsional) --}}
-    @if(isset($recentVideos) && $recentVideos->count() > 0)
-    <section id="videos" class="py-20 scroll-mt-20 relative z-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-5xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent mb-4">Video Terbaru</h2>
-                <p class="text-xl text-gray-600">Koleksi video terbaru kami</p>
-            </div>
-            <div class="relative">
-                <div class="video-swiper swiper px-2 max-w-6xl mx-auto">
-                    <div class="swiper-wrapper">
-                        @foreach($recentVideos as $video)
-                        <div class="swiper-slide">
-                            <div class="group relative">
-                                <a href="javascript:void(0)" class="recent-card block cursor-pointer" onclick="openVideoModal({ id: {{ $video->id }}, src: '{{ asset('storage/'.$video->file_path) }}', title: '{{ addslashes($video->title) }}', category: '{{ $video->category->name ?? 'Umum' }}', date: '{{ $video->created_at->format('d M Y') }}' })">
-                                    <div class="media relative aspect-square rounded-2xl overflow-hidden">
-                                        <img src="{{ $video->poster_path ? asset('storage/'.$video->poster_path) : asset('images/video_placeholder.jpg') }}" alt="{{ $video->title }}" class="w-full h-full object-cover">
-                                        <div class="absolute inset-0 flex items-center justify-center"><span class="pill-brand-icon w-14 h-14 text-white text-xl"><i class="fas fa-play"></i></span></div>
-                                        <div class="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-                                            <span class="pill-brand text-[11px] font-semibold">{{ $video->category->name ?? 'Umum' }}</span>
-                                            <span class="pill-brand text-[11px] font-semibold whitespace-nowrap"><i class="fas fa-clock mr-1"></i>{{ $video->created_at->diffForHumans() }}</span>
-                                        </div>
-                                        <div class="absolute bottom-3 left-3 right-3 flex items-end justify-between pointer-events-none">
-                                            <h3 class="text-white font-bold text-sm md:text-base drop-shadow-lg line-clamp-1">{{ $video->title }}</h3>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-                <button class="video-prev glass-card hidden md:flex items-center justify-center absolute -left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/70 border border-white/60 shadow"><i class="fas fa-chevron-left text-gray-800"></i></button>
-                <button class="video-next glass-card hidden md:flex items-center justify-center absolute -right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/70 border border-white/60 shadow"><i class="fas fa-chevron-right text-gray-800"></i></button>
-            </div>
-        </div>
-    </section>
-    @endif
 
-    {{-- Modal Video sederhana (reuse shell modal foto nanti) --}}
-    <div id="videoModal" class="fixed inset-0 z-50 hidden items-center justify-center">
-        <div class="absolute inset-0 bg-white/10 backdrop-blur-xl"></div>
-        <div class="relative max-w-6xl w-full mx-auto px-6">
-            <div class="relative bg-transparent modal-pane rounded-3xl overflow-hidden" id="videoModalContent">
-                <video id="videoPlayer" class="w-full aspect-video rounded-2xl" controls preload="metadata"></video>
-                <button onclick="closeVideoModal()" class="absolute top-3 right-3 pill-brand-icon"><i class="fas fa-times"></i></button>
-            </div>
-        </div>
-    </div>
 
     <!-- CTA Section dengan Futuristic Design -->
     <section class="py-20 relative overflow-hidden z-10">
@@ -483,7 +449,7 @@
 </div>
 
 <!-- Photo Modal Lightbox dengan Futuristic Design -->
-<div id="photoModal" class="fixed inset-0 bg-white/10 backdrop-blur-xl z-50 hidden opacity-0 transition-opacity duration-300">
+<div id="photoModal" class="fixed inset-0 bg-white/10 backdrop-blur-xl z-50 z-[1000] hidden opacity-0 transition-opacity duration-300">
     <div class="absolute inset-0 flex items-center justify-center p-4">
         <!-- Close Button dengan Glassmorphism -->
         <button onclick="closePhotoModal()" class="glass-card absolute top-6 right-6 w-14 h-14 bg-white/10 hover:bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center transition-all duration-300 z-10 group border border-white/20 shadow-xl hover:scale-110">
@@ -569,6 +535,86 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- News Modal (text-only) -->
+<div id="newsModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[1000] hidden opacity-0 transition-opacity duration-300">
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="max-w-3xl w-full bg-white rounded-[16px] overflow-hidden shadow-2xl border border-gray-200 transform scale-95 transition-transform duration-300" id="newsModalCard">
+            <div class="p-6 relative max-h-[80vh] flex flex-col">
+                <button type="button" data-close-news class="absolute top-3 right-3 w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center shadow">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="flex items-start justify-between mb-3 pr-10">
+                    <div>
+                        <h3 id="newsTitle" class="text-[22px] font-extrabold text-gray-900 mb-1"></h3>
+                        <div class="flex items-center gap-3 text-xs text-gray-600">
+                            <span id="newsCategory" class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 border text-gray-700"></span>
+                            <span id="newsDate" class="inline-flex items-center gap-1 text-gray-500"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="h-px bg-gray-200/70 mb-4"></div>
+                <div class="overflow-y-auto pr-1" style="scrollbar-gutter: stable;">
+                    <p id="newsExcerpt" class="text-gray-700 mb-4"></p>
+                    <div id="newsContent" class="prose max-w-none"></div>
+                </div>
+                <div class="mt-4 flex justify-end shrink-0">
+                    <button type="button" data-close-news class="px-4 py-2 rounded-full bg-primary-600 text-white hover:bg-primary-700 shadow-sm">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function(){
+            function openNewsModal(data){
+                const modal = document.getElementById('newsModal');
+                const card = document.getElementById('newsModalCard');
+                document.getElementById('newsTitle').textContent = data.title || '';
+                document.getElementById('newsCategory').textContent = data.category || 'Umum';
+                document.getElementById('newsDate').innerHTML = '<i class="fas fa-clock"></i> ' + (data.date || '');
+                document.getElementById('newsExcerpt').textContent = data.excerpt || '';
+                document.getElementById('newsContent').innerHTML = data.content || '';
+                modal.classList.remove('hidden');
+                setTimeout(()=>{ modal.classList.remove('opacity-0'); card.classList.remove('scale-95'); card.classList.add('scale-100'); }, 10);
+                document.body.style.overflow = 'hidden';
+            }
+            function closeNewsModal(){
+                const modal = document.getElementById('newsModal');
+                const card = document.getElementById('newsModalCard');
+                modal.classList.add('opacity-0');
+                card.classList.remove('scale-100'); card.classList.add('scale-95');
+                setTimeout(()=>{ modal.classList.add('hidden'); document.body.style.overflow = ''; }, 300);
+            }
+            document.addEventListener('click', function(e){
+                const btn = e.target.closest('.open-news');
+                if (btn){
+                    e.preventDefault();
+                    openNewsModal({
+                        title: btn.dataset.title,
+                        category: btn.dataset.category,
+                        date: btn.dataset.date,
+                        excerpt: btn.dataset.excerpt,
+                        content: btn.dataset.content
+                    });
+                    return;
+                }
+                const modal = document.getElementById('newsModal');
+                const card = document.getElementById('newsModalCard');
+                if (!modal.classList.contains('hidden')){
+                    // Close if click on backdrop or any [data-close-news]
+                    if (e.target === modal || (!card.contains(e.target)) || e.target.closest('[data-close-news]')){
+                        closeNewsModal();
+                    }
+                }
+            });
+            document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeNewsModal(); });
+            // Ensure direct click on close button works
+            document.querySelectorAll('#newsModal [data-close-news]').forEach(function(btn){
+                btn.addEventListener('click', function(ev){ ev.preventDefault(); closeNewsModal(); });
+            });
+        })();
+    </script>
 </div>
 
 @push('styles')
@@ -809,10 +855,10 @@
   /* Arrows polish */
   .recent-prev,.recent-next{ transition: transform .2s, box-shadow .2s, background-color .2s; }
   .recent-prev:hover,.recent-next:hover{ transform: scale(1.08); box-shadow: 0 12px 24px rgba(0,0,0,.15); background-color: rgba(255,255,255,.85); }
-  /* Brand coral/pink pills (A) */
-  .pill-brand{ background: linear-gradient(180deg,#FF6F61,#ff8a7f); color:#111827; padding:.35rem .7rem; border-radius:9999px; box-shadow:0 6px 14px rgba(255,111,97,.35); border:1px solid rgba(255,255,255,.25); }
-  .pill-brand-strong{ background: linear-gradient(180deg,#ff9f92,#FF6F61); color:#0f172a; padding:.35rem .6rem; border-radius:14px; box-shadow:0 8px 16px rgba(255,111,97,.35); border:1px solid rgba(255,255,255,.25); }
-  .pill-brand-icon{ width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:9999px; background: linear-gradient(180deg,#ff9f92,#FF6F61); color:#111827; box-shadow:0 6px 14px rgba(255,111,97,.3); border:1px solid rgba(255,255,255,.25); }
+  /* Neutral gray pills */
+  .pill-brand{ background: linear-gradient(180deg,#6B7280,#4B5563); color:#ffffff; padding:.35rem .7rem; border-radius:9999px; box-shadow:0 6px 14px rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.22); }
+  .pill-brand-strong{ background: linear-gradient(180deg,#9CA3AF,#6B7280); color:#ffffff; padding:.35rem .6rem; border-radius:14px; box-shadow:0 8px 16px rgba(0,0,0,.2); border:1px solid rgba(255,255,255,.22); }
+  .pill-brand-icon{ width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:12px; background: linear-gradient(180deg,#6B7280,#4B5563); color:#ffffff; box-shadow:0 6px 14px rgba(0,0,0,.22); border:1px solid rgba(255,255,255,.22); }
   /* Emphasize active slide (soft) */
   .recent-swiper .swiper-slide{ transition: transform .35s ease, box-shadow .35s ease, opacity .35s ease; }
   .recent-swiper .swiper-slide-active .group{ transform: translateY(-8px) scale(1.04); box-shadow: 0 20px 50px rgba(0,0,0,.16), 0 10px 30px rgba(255,111,97,.18); }
@@ -1106,6 +1152,7 @@
     
 
     function openPhotoModal(item) {
+        try { console.log('[PhotoModal] open', item && item.id); } catch(e) {}
         if (!playlist.length) playlist = buildPlaylist();
         const idx = playlist.findIndex(p => p.id === item.id);
         currentIndex = idx >= 0 ? idx : 0;
@@ -1124,8 +1171,12 @@
                 }
             }, 10);
             document.body.style.overflow = 'hidden';
+        } else {
+            try { console.warn('[PhotoModal] element not found'); } catch(e) {}
         }
     }
+    // Ensure globally accessible for inline onclick
+    try { window.openPhotoModal = openPhotoModal; } catch(e) {}
 
     function showByIndex(i){
         if (!playlist.length) return;
@@ -1461,3 +1512,4 @@
 @endpush
 @endsection
 
+ 

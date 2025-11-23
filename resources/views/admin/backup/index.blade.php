@@ -16,7 +16,7 @@
                     <button onclick="createBackup()" 
                             class="inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
                             style="background: #FF6F61; color: white;">
-                        <i class="fas fa-cloud-download-alt mr-2"></i>
+                        <i class="fas fa-database mr-2"></i>
                         Create Backup
                     </button>
                 </div>
@@ -50,30 +50,30 @@
 
         <!-- Backup Info Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="modern-card hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-orange-50">
-                <div class="modern-card-content p-6 text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                        <i class="fas fa-database text-white text-2xl"></i>
+            <div class="bg-white border border-gray-200 rounded-2xl">
+                <div class="p-6 text-center">
+                    <div class="w-16 h-16 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-database text-2xl"></i>
                     </div>
                     <h3 class="text-gray-800 font-bold text-lg mb-2">Database Backup</h3>
                     <p class="text-gray-600 text-sm">All data including photos, categories, testimonials, and user accounts</p>
                 </div>
             </div>
             
-            <div class="modern-card hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-amber-50">
-                <div class="modern-card-content p-6 text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                        <i class="fas fa-folder text-white text-2xl"></i>
+            <div class="bg-white border border-gray-200 rounded-2xl">
+                <div class="p-6 text-center">
+                    <div class="w-16 h-16 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-folder text-2xl"></i>
                     </div>
                     <h3 class="text-gray-800 font-bold text-lg mb-2">Files Backup</h3>
                     <p class="text-gray-600 text-sm">All uploaded images, thumbnails, and storage files</p>
                 </div>
             </div>
             
-            <div class="modern-card hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-yellow-50">
-                <div class="modern-card-content p-6 text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                        <i class="fas fa-shield-check text-white text-2xl"></i>
+            <div class="bg-white border border-gray-200 rounded-2xl">
+                <div class="p-6 text-center">
+                    <div class="w-16 h-16 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-shield-check text-2xl"></i>
                     </div>
                     <h3 class="text-gray-800 font-bold text-lg mb-2">Complete Backup</h3>
                     <p class="text-gray-600 text-sm">Full system backup including database and all files</p>
@@ -82,29 +82,29 @@
         </div>
 
         <!-- Restore Section -->
-        <div class="modern-card mb-8 hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-orange-50">
-            <div class="modern-card-header border-b border-orange-100 pb-6">
+        <div class="bg-white border border-gray-200 rounded-2xl mb-8">
+            <div class="border-b border-gray-200 pb-6 px-6 pt-6">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="modern-card-title text-xl font-bold flex items-center">
-                            <div class="w-3 h-3 bg-orange-400 rounded-full mr-3"></div>
+                        <h3 class="text-xl font-bold flex items-center">
+                            <div class="w-3 h-3 bg-gray-400 rounded-full mr-3"></div>
                             Restore from Backup
                         </h3>
                         <p class="text-gray-500 text-sm mt-1">Upload and restore a previous backup</p>
                     </div>
-                    <div class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-medium">
+                    <div class="text-gray-600 px-3 py-1 rounded text-xs font-medium">
                         <i class="fas fa-upload mr-1"></i>
                         File Upload
                     </div>
                 </div>
             </div>
-            <div class="modern-card-content pt-8">
-                <div class="flex items-center space-x-4 mb-4">
+            <div class="px-6 pt-8 pb-6">
+                <div class="flex flex-wrap items-center gap-4 mb-4">
                     <div class="flex-1">
                         <input type="file" id="restore-file" accept=".zip" 
-                               class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-400 file:text-white hover:file:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-transparent transition-all duration-300">
+                               class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-800 file:text-white hover:file:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent">
                     </div>
-                    <button onclick="restoreBackup()" class="bg-gradient-to-r from-orange-400 to-red-400 hover:from-orange-500 hover:to-red-500 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center">
+                    <button onclick="restoreBackup()" class="bg-gray-800 hover:bg-gray-900 text-white px-6 py-3 rounded-lg font-semibold inline-flex items-center">
                         <i class="fas fa-history mr-2"></i>
                         Restore
                     </button>
@@ -124,18 +124,18 @@
         </div>
 
         <!-- Existing Backups -->
-        <div class="modern-card hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-orange-50">
-            <div class="modern-card-header border-b border-orange-100 pb-6">
+        <div class="bg-white border border-gray-200 rounded-2xl">
+            <div class="border-b border-gray-200 pb-6 px-6 pt-6">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="modern-card-title text-xl font-bold flex items-center">
-                            <div class="w-3 h-3 bg-orange-400 rounded-full mr-3"></div>
+                        <h3 class="text-xl font-bold flex items-center">
+                            <div class="w-3 h-3 bg-gray-400 rounded-full mr-3"></div>
                             Existing Backups
                         </h3>
                         <p class="text-gray-500 text-sm mt-1">Manage your backup files</p>
                     </div>
                     @if(count($backups) > 0)
-                        <div class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-medium">
+                        <div class="text-gray-600 px-3 py-1 rounded text-xs font-medium">
                             <i class="fas fa-archive mr-1"></i>
                             {{ count($backups) }} Backups
                         </div>
@@ -144,16 +144,15 @@
             </div>
 
             @if(count($backups) > 0)
-                <div class="modern-card-content pt-8">
+                <div class="px-6 pt-8 pb-6">
                     <div class="space-y-4">
                         @foreach($backups as $backup)
                             <div class="backup-item group relative">
-                                <div class="absolute inset-0 bg-gradient-to-r from-orange-200 to-amber-200 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
-                                <div class="relative bg-white/90 backdrop-blur-xl rounded-2xl p-6 border border-orange-100 hover:border-orange-200 transition-all duration-300">
+                                <div class="relative bg-white rounded-2xl p-6 border border-gray-200 hover:border-gray-300 transition">
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center space-x-4">
-                                            <div class="w-14 h-14 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300">
-                                                <i class="fas fa-cloud-download-alt text-white text-xl"></i>
+                                            <div class="w-14 h-14 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-cloud-download-alt text-xl"></i>
                                             </div>
                                             <div>
                                                 <h4 class="text-gray-800 font-bold text-lg">{{ $backup['filename'] }}</h4>
@@ -172,12 +171,12 @@
 
                                         <div class="flex space-x-2">
                                             <a href="{{ route('admin.backup.download', $backup['filename']) }}" 
-                                               class="bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-500 hover:to-yellow-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                               class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold">
                                                 <i class="fas fa-download mr-1"></i>
                                                 Download
                                             </a>
                                             <button onclick="deleteBackup('{{ $backup['filename'] }}')" 
-                                                    class="bg-gradient-to-r from-red-400 to-pink-400 hover:from-red-500 hover:to-pink-500 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                                    class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold">
                                                 <i class="fas fa-trash mr-1"></i>
                                                 Delete
                                             </button>
@@ -190,12 +189,12 @@
                 </div>
             @else
                 <div class="text-center py-16">
-                    <div class="bg-gradient-to-br from-orange-100 to-amber-100 rounded-full w-32 h-32 flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-cloud-download-alt text-6xl text-orange-400"></i>
+                    <div class="bg-gray-100 rounded-full w-32 h-32 flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-cloud-download-alt text-6xl text-gray-400"></i>
                     </div>
                     <h3 class="text-3xl font-bold text-gray-800 mb-4">No Backups Found</h3>
                     <p class="text-gray-600 mb-8 max-w-md mx-auto text-lg">Create your first backup to secure your data.</p>
-                    <button onclick="createBackup()" class="bg-gradient-to-r from-orange-400 to-amber-400 hover:from-orange-500 hover:to-amber-500 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg inline-flex items-center">
+                    <button onclick="createBackup()" class="bg-gray-800 hover:bg-gray-900 text-white px-8 py-4 rounded-lg font-semibold inline-flex items-center">
                         <i class="fas fa-plus mr-2"></i>
                         Create First Backup
                     </button>
@@ -208,8 +207,8 @@
 <!-- Loading Modal -->
 <div id="loading-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden">
     <div class="flex items-center justify-center min-h-screen">
-        <div class="modern-card border-0 bg-white/90 backdrop-blur-xl p-8 text-center max-w-md mx-4">
-            <div class="w-16 h-16 bg-gradient-to-br from-orange-400 to-amber-400 rounded-full flex items-center justify-center mx-auto mb-6">
+        <div class="bg-white border border-gray-200 rounded-2xl p-8 text-center max-w-md mx-4">
+            <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
             </div>
             <h3 class="text-gray-800 font-bold text-xl mb-2" id="loading-title">Processing...</h3>
@@ -237,23 +236,27 @@ function createBackup() {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(async (response) => {
+        const text = await response.text();
+        try { return JSON.parse(text); } catch(e) { throw new Error(text || 'Non-JSON response'); }
+    })
     .then(data => {
         hideLoading();
         if (data.success) {
-            alert('Backup created successfully!');
+            showToast('Backup created successfully!', 'success');
             location.reload();
         } else {
-            alert('Failed to create backup: ' + data.message);
+            showToast('Failed to create backup: ' + (data.message || 'Unknown error'), 'error');
         }
     })
     .catch(error => {
         hideLoading();
         console.error('Error:', error);
-        alert('An error occurred while creating backup');
+        showToast('An error occurred while creating backup: ' + (error && error.message ? error.message : 'Unknown error'), 'error');
     });
 }
 
@@ -262,7 +265,7 @@ function restoreBackup() {
     const file = fileInput.files[0];
     
     if (!file) {
-        alert('Please select a backup file to restore');
+        showToast('Please select a backup file to restore', 'info');
         return;
     }
     
@@ -278,22 +281,26 @@ function restoreBackup() {
     
     fetch('{{ route("admin.backup.restore") }}', {
         method: 'POST',
+        headers: { 'Accept': 'application/json' },
         body: formData
     })
-    .then(response => response.json())
+    .then(async (response) => {
+        const text = await response.text();
+        try { return JSON.parse(text); } catch(e) { throw new Error(text || 'Non-JSON response'); }
+    })
     .then(data => {
         hideLoading();
         if (data.success) {
-            alert('Backup restored successfully! The page will now refresh.');
+            showToast('Backup restored successfully! The page will now refresh.', 'success');
             location.reload();
         } else {
-            alert('Failed to restore backup: ' + data.message);
+            showToast('Failed to restore backup: ' + (data.message || 'Unknown error'), 'error');
         }
     })
     .catch(error => {
         hideLoading();
         console.error('Error:', error);
-        alert('An error occurred while restoring backup');
+        showToast('An error occurred while restoring backup: ' + (error && error.message ? error.message : 'Unknown error'), 'error');
     });
 }
 
@@ -312,15 +319,15 @@ function deleteBackup(filename) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Backup deleted successfully!');
+            showToast('Backup deleted successfully!', 'success');
             location.reload();
         } else {
-            alert('Failed to delete backup: ' + data.message);
+            showToast('Failed to delete backup: ' + (data.message || 'Unknown error'), 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while deleting backup');
+        showToast('An error occurred while deleting backup', 'error');
     });
 }
 </script>

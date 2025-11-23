@@ -186,9 +186,24 @@ class BackupController extends Controller
             $dbPath = config("database.connections.{$connection}.database");
             copy($dbPath, $filename);
         } else {
-            // For MySQL/PostgreSQL
-            $command = "mysqldump --user={$username} --password={$password} --host={$host} --port={$port} {$database} > {$filename}";
-            exec($command);
+            // For MySQL - locate mysqldump binary and capture errors
+            $dumpBin = $this->findMysqlBinary('mysqldump');
+            $command = sprintf(
+                '%s --user=%s --password=%s --host=%s --port=%s %s > %s 2>&1',
+                escapeshellcmd($dumpBin),
+                escapeshellarg($username),
+                escapeshellarg($password),
+                escapeshellarg($host),
+                escapeshellarg($port),
+                escapeshellarg($database),
+                escapeshellarg($filename)
+            );
+            $output = [];
+            $returnVar = 0;
+            exec($command, $output, $returnVar);
+            if ($returnVar !== 0 || !file_exists($filename) || filesize($filename) === 0) {
+                throw new \Exception('mysqldump failed. Command: ' . $command . ' Output: ' . implode("\n", $output));
+            }
         }
     }
 
@@ -260,9 +275,24 @@ class BackupController extends Controller
             $password = config("database.connections.{$connection}.password");
             $host = config("database.connections.{$connection}.host");
             $port = config("database.connections.{$connection}.port");
-            
-            $command = "mysql --user={$username} --password={$password} --host={$host} --port={$port} {$database} < {$sqlFile}";
-            exec($command);
+
+            $mysqlBin = $this->findMysqlBinary('mysql');
+            $command = sprintf(
+                '%s --user=%s --password=%s --host=%s --port=%s %s < %s 2>&1',
+                escapeshellcmd($mysqlBin),
+                escapeshellarg($username),
+                escapeshellarg($password),
+                escapeshellarg($host),
+                escapeshellarg($port),
+                escapeshellarg($database),
+                escapeshellarg($sqlFile)
+            );
+            $output = [];
+            $returnVar = 0;
+            exec($command, $output, $returnVar);
+            if ($returnVar !== 0) {
+                throw new \Exception('mysql restore failed. Command: ' . $command . ' Output: ' . implode("\n", $output));
+            }
         }
     }
 
@@ -334,5 +364,34 @@ class BackupController extends Controller
         }
         
         return round($size, $precision) . ' ' . $units[$i];
+    }
+
+    private function findMysqlBinary($binary)
+    {
+        // Environment overrides
+        $envKey = strtoupper($binary) . '_PATH';
+        $envPath = env($envKey);
+        if ($envPath && file_exists($envPath)) {
+            return $envPath;
+        }
+
+        // Common locations (Windows/XAMPP, MySQL installer, Linux, macOS)
+        $candidates = [
+            'C:\\xampp\\mysql\\bin\\' . $binary . '.exe',
+            'C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\' . $binary . '.exe',
+            'C:\\Program Files (x86)\\MySQL\\MySQL Server 8.0\\bin\\' . $binary . '.exe',
+            '/usr/bin/' . $binary,
+            '/usr/local/bin/' . $binary,
+            '/opt/homebrew/bin/' . $binary,
+        ];
+
+        foreach ($candidates as $path) {
+            if (file_exists($path)) {
+                return $path;
+            }
+        }
+
+        // Fallback - rely on PATH
+        return $binary;
     }
 }

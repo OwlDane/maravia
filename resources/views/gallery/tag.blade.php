@@ -50,8 +50,8 @@
                             <div class="absolute bottom-4 left-4 right-4">
                                 <h3 class="text-white font-semibold text-lg mb-1">{{ $photo->title }}</h3>
                                 <div class="flex items-center justify-between text-white/80 text-sm">
-                                    <span class="bg-{{ $photo->category->color }}-500 px-2 py-1 rounded text-xs">
-                                        {{ $photo->category->name }}
+                                    <span class="bg-{{ $photo->category->color ?? 'gray' }}-500 px-2 py-1 rounded text-xs">
+                                        {{ $photo->category?->name ?? 'Umum' }}
                                     </span>
                                     <div class="flex items-center">
                                         <i class="fas fa-eye mr-1"></i>

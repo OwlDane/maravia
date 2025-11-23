@@ -133,6 +133,10 @@ body::after {
     color: #FF6F61;
 }
 
+.font-display {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+}
+
 .hover-lift {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }

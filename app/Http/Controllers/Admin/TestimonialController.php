@@ -27,9 +27,16 @@ class TestimonialController extends Controller
             });
         }
 
-        // Filter by status
+        // Filter by status (accept '0'/'1' and words)
         if ($request->has('status') && $request->status !== '') {
-            $query->where('is_approved', $request->status);
+            $status = strtolower((string) $request->status);
+            $map = [
+                '1' => true, 'true' => true, 'approved' => true, 'yes' => true,
+                '0' => false, 'false' => false, 'pending' => false, 'no' => false,
+            ];
+            if (array_key_exists($status, $map)) {
+                $query->where('is_approved', $map[$status]);
+            }
         }
 
         // Filter by spam score
@@ -64,10 +71,7 @@ class TestimonialController extends Controller
         return view('admin.testimonials.index', compact('testimonials'));
     }
 
-    public function show(Testimonial $testimonial)
-    {
-        return view('admin.testimonials.show', compact('testimonial'));
-    }
+    
 
     public function approve(Testimonial $testimonial)
     {

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,8 +20,10 @@ class DownloadController extends Controller
             abort(404);
         }
 
-        // Increment download count
-        $photo->increment('download_count');
+        // Increment download count if column exists
+        if (Schema::hasColumn('photos', 'download_count')) {
+            $photo->increment('download_count');
+        }
 
         // Record user activity if authenticated
         if (Auth::check()) {
@@ -33,16 +36,58 @@ class DownloadController extends Controller
         }
 
         $size = $request->get('size', 'original');
-        $watermark = $request->get('watermark', 'true') === 'true';
+        $watermark = false; // watermark disabled globally
 
         try {
+            // If Intervention Image is unavailable, serve the original file directly
+            if (!class_exists(\Intervention\Image\ImageManager::class)) {
+                $imagePath = storage_path('app/public/' . $photo->path);
+                if (!file_exists($imagePath)) {
+                    // Serve static placeholder if available
+                    $placeholder = public_path('images/placeholder.jpg');
+                    if (file_exists($placeholder)) {
+                        return Response::download($placeholder, $this->generateFilename($photo, $size, false));
+                    }
+                    // Last resort: small transparent PNG
+                    $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6X8qQAAAABJRU5ErkJggg==');
+                    return Response::make($png, 200, [
+                        'Content-Type' => 'image/png',
+                        'Content-Disposition' => 'attachment; filename="' . $this->generateFilename($photo, $size, false) . '"',
+                        'Content-Length' => strlen($png),
+                    ]);
+                }
+                $filename = $this->generateFilename($photo, $size, false);
+                return Response::download($imagePath, $filename);
+            }
+
             $manager = new ImageManager(new Driver());
             
             // Get the original image path
             $imagePath = storage_path('app/public/' . $photo->path);
             
             if (!file_exists($imagePath)) {
-                abort(404, 'Image file not found');
+                // Generate a placeholder image dynamically
+                $canvas = $manager->create(1600, 1000);
+                $canvas->fill('#f5f5f5');
+                // Simple band
+                $canvas->drawRectangle(0, 900, 1600, 1000, function ($draw) {
+                    $draw->background('rgba(0,0,0,0.85)');
+                });
+                $title = $photo->title ?: config('app.name', 'Maravia');
+                $canvas->text($title, 40, 940, function ($font) {
+                    $font->size(42);
+                    $font->color('#ffffff');
+                    $font->align('left');
+                    $font->valign('top');
+                });
+
+                $imageData = $canvas->toJpeg(90);
+                $filename = $this->generateFilename($photo, $size, false);
+                return Response::make($imageData, 200, [
+                    'Content-Type' => 'image/jpeg',
+                    'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                    'Content-Length' => strlen($imageData),
+                ]);
             }
 
             // Load the image
@@ -65,13 +110,10 @@ class DownloadController extends Controller
                     break;
             }
 
-            // Add watermark if requested
-            if ($watermark) {
-                $this->addWatermark($image, $photo);
-            }
+            // Watermark disabled
 
             // Generate filename
-            $filename = $this->generateFilename($photo, $size, $watermark);
+            $filename = $this->generateFilename($photo, $size, false);
 
             // Convert to JPEG and get binary data
             $imageData = $image->toJpeg(90);
@@ -93,7 +135,7 @@ class DownloadController extends Controller
         $height = $image->height();
 
         // Create watermark text
-        $schoolName = config('app.name', 'Cione Gallery');
+        $schoolName = config('app.name', 'Maravia');
         $watermarkText = $schoolName . ' - ' . $photo->title;
         
         // Calculate font size based on image dimensions
@@ -114,7 +156,7 @@ class DownloadController extends Controller
         });
 
         // Add smaller copyright text
-        $copyrightText = ' ' . date('Y') . ' ' . config('app.name', 'Cione Gallery') . ' - All Rights Reserved';
+        $copyrightText = ' ' . date('Y') . ' ' . config('app.name', 'Maravia') . ' - All Rights Reserved';
         $image->text($copyrightText, 20, $height - 25, function ($font) use ($fontSize) {
             $font->size($fontSize * 0.7);
             $font->color('#cccccc');
@@ -181,7 +223,7 @@ class DownloadController extends Controller
             'photo_ids' => 'required|array|max:50', // Limit bulk downloads
             'photo_ids.*' => 'exists:photos,id',
             'size' => 'in:small,medium,large,original',
-            'watermark' => 'boolean'
+            // watermark removed
         ]);
 
         $photos = Photo::whereIn('id', $request->photo_ids)
@@ -206,10 +248,10 @@ class DownloadController extends Controller
         }
 
         $size = $request->get('size', 'medium');
-        $watermark = $request->get('watermark', true);
+        $watermark = false; // disabled globally
 
         // Create a temporary zip file
-        $zipFileName = 'cione_gallery_' . date('Y-m-d_H-i-s') . '.zip';
+        $zipFileName = 'maravia_gallery_' . date('Y-m-d_H-i-s') . '.zip';
         $zipPath = storage_path('app/temp/' . $zipFileName);
 
         // Ensure temp directory exists
@@ -223,7 +265,8 @@ class DownloadController extends Controller
         }
 
         try {
-            $manager = new ImageManager(new Driver());
+            $useProcessor = class_exists(\Intervention\Image\ImageManager::class);
+            $manager = $useProcessor ? new ImageManager(new Driver()) : null;
 
             foreach ($photos as $photo) {
                 $imagePath = storage_path('app/public/' . $photo->path);
@@ -232,31 +275,24 @@ class DownloadController extends Controller
                     continue;
                 }
 
-                // Process image
-                $image = $manager->read($imagePath);
-
-                // Resize
-                switch ($size) {
-                    case 'small':
-                        $image->scale(width: 800);
-                        break;
-                    case 'medium':
-                        $image->scale(width: 1200);
-                        break;
-                    case 'large':
-                        $image->scale(width: 1920);
-                        break;
+                // If image processor exists, optionally resize; else add original file
+                $filename = $this->generateFilename($photo, $size, false);
+                if ($useProcessor) {
+                    $image = $manager->read($imagePath);
+                    switch ($size) {
+                        case 'small':
+                            $image->scale(width: 800); break;
+                        case 'medium':
+                            $image->scale(width: 1200); break;
+                        case 'large':
+                            $image->scale(width: 1920); break;
+                    }
+                    $imageData = $image->toJpeg(90);
+                    $zip->addFromString($filename, $imageData);
+                } else {
+                    // Add original without processing
+                    $zip->addFile($imagePath, $filename);
                 }
-
-                // Add watermark
-                if ($watermark) {
-                    $this->addWatermark($image, $photo);
-                }
-
-                // Generate filename and add to zip
-                $filename = $this->generateFilename($photo, $size, $watermark);
-                $imageData = $image->toJpeg(90);
-                $zip->addFromString($filename, $imageData);
 
                 // Increment download count
                 $photo->increment('download_count');

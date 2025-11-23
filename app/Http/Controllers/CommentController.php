@@ -9,16 +9,20 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Schema;
 
 class CommentController extends Controller
 {
     public function store(Request $request, Photo $photo): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
+        $rules = [
             'comment' => 'required|string|max:1000',
-            'name' => 'required_without:user_id|string|max:255',
-            'email' => 'required_without:user_id|email|max:255'
-        ]);
+        ];
+        if (!Auth::check()) {
+            $rules['name'] = 'required|string|max:255';
+            $rules['email'] = 'required|email|max:255';
+        }
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return response()->json([
@@ -34,7 +38,10 @@ class CommentController extends Controller
         ];
 
         if (Auth::check()) {
-            $commentData['user_id'] = Auth::id();
+            // Only set user_id if the column exists to avoid SQL errors on older schema
+            if (Schema::hasColumn('photo_comments', 'user_id')) {
+                $commentData['user_id'] = Auth::id();
+            }
             $commentData['name'] = Auth::user()->name;
             $commentData['email'] = Auth::user()->email;
         } else {
@@ -43,6 +50,10 @@ class CommentController extends Controller
         }
 
         $comment = PhotoComment::create($commentData);
+        // Attach request metadata for admin moderation
+        $comment->ip_address = $request->ip();
+        $comment->user_agent = $request->header('User-Agent');
+        $comment->save();
         $comment->load(['user', 'reactions']);
 
         // Record activity for authenticated users
@@ -74,7 +85,7 @@ class CommentController extends Controller
             ->latest()
             ->paginate(10);
 
-        $commentsData = $comments->map(function ($comment) {
+        $commentsData = $comments->getCollection()->map(function ($comment) {
             return [
                 'id' => $comment->id,
                 'comment' => $comment->comment,
@@ -85,7 +96,7 @@ class CommentController extends Controller
                 'user_reaction' => Auth::check() ? $comment->getUserReaction(Auth::id()) : null,
                 'total_reactions' => $comment->getTotalReactionsCount()
             ];
-        });
+        })->values()->all();
 
         return response()->json([
             'success' => true,
