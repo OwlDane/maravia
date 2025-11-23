@@ -49,6 +49,20 @@
   - Added `URL::forceScheme('https')` in `AppServiceProvider`
   - Configured `trustProxies` middleware for Railway
 
+### 5. JavaScript Syntax Error (RESOLVED ✓)
+- **Problem**: Missing closing brace in `renderModalFromItem` function
+- **Impact**: JavaScript failed to execute, breaking navigation and modals
+- **Solution**: Added missing `}` at line 1152 in `gallery/index.blade.php`
+
+### 6. Navbar Navigation Not Working (RESOLVED ✓)
+- **Problem**: Navbar links using hash anchors (#categories, #recent, #news) only worked on homepage
+- **Impact**: Users couldn't navigate to other pages from navbar
+- **Solution**: 
+  - Changed "Kategori" link to `route('gallery')`
+  - Changed "Terbaru" link to `route('gallery')`
+  - Changed "Berita" link to `route('news.index')`
+  - Fixed both desktop and mobile menu
+
 ## Files Changed
 
 - ✅ `server.php` (created)
@@ -60,3 +74,5 @@
 - ✅ `.env.example` (updated with HTTPS settings)
 - ✅ `app/Providers/AppServiceProvider.php` (added HTTPS forcing)
 - ✅ `bootstrap/app.php` (added proxy trust configuration)
+- ✅ `resources/views/gallery/index.blade.php` (fixed JavaScript syntax error)
+- ✅ `resources/views/layouts/app.blade.php` (fixed navbar navigation links)

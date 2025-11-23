@@ -55,13 +55,13 @@
                     <a href="{{ route('home') }}" class="text-gray-700 hover:text-coral-500 font-medium transition-colors">
                         <i class="fas fa-home mr-2"></i>Beranda
                     </a>
-                    <a href="{{ route('home') }}#categories" class="text-gray-700 hover:text-coral-500 font-medium transition-colors">
+                    <a href="{{ route('gallery') }}" class="text-gray-700 hover:text-coral-500 font-medium transition-colors">
                         <i class="fas fa-th-large mr-2"></i>Kategori
                     </a>
-                    <a href="{{ route('home') }}#recent" class="text-gray-700 hover:text-coral-500 font-medium transition-colors">
+                    <a href="{{ route('gallery') }}" class="text-gray-700 hover:text-coral-500 font-medium transition-colors">
                         <i class="fas fa-clock mr-2"></i>Terbaru
                     </a>
-                    <a href="{{ route('home') }}#news" class="text-gray-700 hover:text-coral-500 font-medium transition-colors">
+                    <a href="{{ route('news.index') }}" class="text-gray-700 hover:text-coral-500 font-medium transition-colors">
                         <i class="fas fa-newspaper mr-2"></i>Berita
                     </a>
                     <a href="{{ route('home') }}#contact" class="text-gray-700 hover:text-coral-500 font-medium transition-colors">
@@ -110,13 +110,13 @@
                 <a href="{{ route('home') }}" class="block text-gray-700 hover:text-coral-500 font-medium">
                     <i class="fas fa-home mr-2"></i>Beranda
                 </a>
-                <a href="{{ route('home') }}#categories" class="block text-gray-700 hover:text-coral-500 font-medium">
+                <a href="{{ route('gallery') }}" class="block text-gray-700 hover:text-coral-500 font-medium">
                     <i class="fas fa-th-large mr-2"></i>Kategori
                 </a>
-                <a href="{{ route('home') }}#recent" class="block text-gray-700 hover:text-coral-500 font-medium">
+                <a href="{{ route('gallery') }}" class="block text-gray-700 hover:text-coral-500 font-medium">
                     <i class="fas fa-clock mr-2"></i>Terbaru
                 </a>
-                <a href="{{ route('home') }}#news" class="block text-gray-700 hover:text-coral-500 font-medium">
+                <a href="{{ route('news.index') }}" class="block text-gray-700 hover:text-coral-500 font-medium">
                     <i class="fas fa-newspaper mr-2"></i>Berita
                 </a>
                 <a href="{{ route('home') }}#contact" class="block text-gray-700 hover:text-coral-500 font-medium">
