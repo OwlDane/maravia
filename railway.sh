@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Exit on error
-set -e
-
 echo "Running migrations..."
 php artisan migrate --force
 
