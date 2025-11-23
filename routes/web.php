@@ -40,10 +40,6 @@ Route::post('/gallery/photo/{photo}/comments', [CommentController::class, 'store
 Route::post('/comments/{comment}/react', [CommentController::class, 'toggleReaction'])->middleware('auth')->name('comments.react');
 Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->middleware('auth')->name('comments.destroy');
 
-// Download routes
-Route::get('/download/photo/{photo}', [DownloadController::class, 'downloadPhoto'])->name('download.photo');
-Route::post('/download/bulk', [DownloadController::class, 'bulkDownload'])->name('download.bulk');
-
 // Testimonials
 Route::get('/testimonials', [GuestTestimonialController::class, 'index'])->name('testimonials');
 Route::post('/testimonials', [GuestTestimonialController::class, 'store'])->name('testimonials.store');
